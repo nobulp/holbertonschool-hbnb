@@ -3,6 +3,7 @@ from app.persistence.repository import InMemoryRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
+from app.models.review import Review
 
 
 class HBnBFacade:
@@ -117,3 +118,51 @@ class HBnBFacade:
 
         self.amenity_repo.update(amenity_id, amenity_data)
         return self.amenity_repo.get(amenity_id)
+
+    # -----------------
+    # Review operations
+    # -----------------
+    def create_review(self, review_data):
+        user_id = review_data.get("user_id")
+        place_id = review_data.get("place_id")
+        if not self.get_user(user_id):
+            raise ValueError("User not found")
+        if not self.get_place(place_id):
+            raise ValueError("Place not found")
+        review = Review(
+            text=review_data.get("text"),
+            rating=review_data.get("rating"),
+            place_id=place_id,
+            user_id=user_id,
+        )
+        self.review_repo.add(review)
+        return review
+
+    def get_review(self, review_id):
+        return self.review_repo.get(review_id)
+
+    def get_all_reviews(self):
+        return self.review_repo.get_all()
+
+    def get_reviews_by_place(self, place_id):
+        return [r for r in self.review_repo.get_all() if r.place_id == place_id]
+
+    def update_review(self, review_id, review_data):
+        review = self.get_review(review_id)
+        if not review:
+            return None
+        if "rating" in review_data:
+            rating = review_data["rating"]
+            if rating is None or not (1 <= rating <= 5):
+                raise ValueError("Rating must be between 1 and 5")
+        if "text" in review_data and not review_data["text"]:
+            raise ValueError("Text is required")
+        self.review_repo.update(review_id, review_data)
+        return self.get_review(review_id)
+
+    def delete_review(self, review_id):
+        review = self.get_review(review_id)
+        if not review:
+            return False
+        self.review_repo.delete(review_id)
+        return True
