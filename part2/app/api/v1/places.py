@@ -60,7 +60,8 @@ class PlaceList(Resource):
             'price': new_place.price,
             'latitude': new_place.latitude,
             'longitude': new_place.longitude,
-            'owner_id': new_place.owner_id
+            'owner_id': new_place.owner_id,
+            'amenities': [a.id for a in new_place.amenities]
         }, 201
 
     @api.response(200, 'List of places retrieved successfully')
@@ -97,11 +98,9 @@ class PlaceResource(Resource):
                 'email': owner.email
             }
 
-        amenities_data = []
-        for amenity_id in place.amenities:
-            amenity = facade.get_amenity(amenity_id)
-            if amenity:
-                amenities_data.append({'id': amenity.id, 'name': amenity.name})
+        amenities_data = [
+            {'id': a.id, 'name': a.name} for a in place.amenities
+        ]
 
         reviews_data = [
             {
@@ -115,6 +114,7 @@ class PlaceResource(Resource):
             'id': place.id,
             'title': place.title,
             'description': place.description,
+            'price': place.price,
             'latitude': place.latitude,
             'longitude': place.longitude,
             'owner': owner_data,
@@ -135,7 +135,16 @@ class PlaceResource(Resource):
             return {'error': str(e)}, 400
         if not updated_place:
             return {'error': 'Place not found'}, 404
-        return {'message': 'Place updated successfully'}, 200
+        return {
+            'id': updated_place.id,
+            'title': updated_place.title,
+            'description': updated_place.description,
+            'price': updated_place.price,
+            'latitude': updated_place.latitude,
+            'longitude': updated_place.longitude,
+            'owner_id': updated_place.owner_id,
+            'amenities': [a.id for a in updated_place.amenities]
+        }, 200
 
 
 @api.route('/<place_id>/reviews')
