@@ -7,7 +7,7 @@ from app.models.review import Review
 
 
 class HBnBFacade:
-   
+
     def __init__(self):
         self.user_repo = InMemoryRepository()
         self.amenity_repo = InMemoryRepository()
@@ -38,7 +38,7 @@ class HBnBFacade:
         self.user_repo.update(user_id, data)
         return self.get_user(user_id)
 
- # -----------------
+    # -----------------
     # Place operations
     # -----------------
     def create_place(self, place_data):
