@@ -8,6 +8,7 @@ amenity_model = api.model('Amenity', {
     'name': fields.String(required=True, description='Name of the amenity')
 })
 
+
 @api.route('/')
 class AmenityList(Resource):
     @api.expect(amenity_model)
@@ -30,6 +31,7 @@ class AmenityList(Resource):
         """Retrieve a list of all amenities"""
         amenities = facade.get_all_amenities()
         return [{'id': a.id, 'name': a.name} for a in amenities], 200
+
 
 @api.route('/<amenity_id>')
 class AmenityResource(Resource):
@@ -55,4 +57,4 @@ class AmenityResource(Resource):
             return {'error': str(e)}, 400
         if not updated_amenity:
             return {'error': 'Amenity not found'}, 404
-        return {'message': 'Amenity updated successfully'}, 200
+        return {'id': updated_amenity.id, 'name': updated_amenity.name}, 200
