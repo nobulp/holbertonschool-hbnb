@@ -5,7 +5,9 @@ from app.models.user import User
 class Place(BaseModel):
     def __init__(self, title, description, price, latitude, longitude,
                  owner: User, amenities=None):
+
         super().__init__()
+
         self.title = title
         self.description = description
         self.price = price
