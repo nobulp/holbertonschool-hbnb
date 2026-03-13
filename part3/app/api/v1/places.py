@@ -47,10 +47,10 @@ class PlaceList(Resource):
     @api.response(400, 'Invalid input data')
     @jwt_required()
     def post(self):
-        current_user = get_jwt_identity
-        place_data["owner_id"] = current_user
         """Register a new place"""
+        current_user = get_jwt_identity()
         place_data = api.payload
+        place_data["owner_id"] = current_user
         try:
             new_place = facade.create_place(place_data)
         except (ValueError, KeyError) as e:
@@ -130,13 +130,18 @@ class PlaceResource(Resource):
     @api.response(400, 'Invalid input data')
     @jwt_required()
     def put(self, place_id):
-
+        """Update a place's information"""
         current_user = get_jwt_identity()
         place = facade.get_place(place_id)
+
+        if not place:
+            return {'error': 'Place not found'}, 404
+
         if place.owner_id != current_user:
             return {"error": "Unauthorized action"}, 403
-        """Update a place's information"""
+
         place_data = api.payload
+
         try:
             updated_place = facade.update_place(place_id, place_data)
         except (ValueError, KeyError) as e:
