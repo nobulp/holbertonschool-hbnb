@@ -63,7 +63,7 @@ class PlaceList(Resource):
             'latitude': new_place.latitude,
             'longitude': new_place.longitude,
             'owner_id': new_place.owner_id,
-            'amenities': [a.id for a in new_place.amenities]
+            'amenities': [{'id': a.id, 'name': a.name} for a in new_place.amenities]
         }, 201
 
     @api.response(200, 'List of places retrieved successfully')
@@ -90,18 +90,18 @@ class PlaceResource(Resource):
         if not place:
             return {'error': 'Place not found'}, 404
 
-        owner = facade.get_user(place.owner_id)
         owner_data = None
-        if owner:
+        if place.owner:
             owner_data = {
-                'id': owner.id,
-                'first_name': owner.first_name,
-                'last_name': owner.last_name,
-                'email': owner.email
+                'id': place.owner.id,
+                'first_name': place.owner.first_name,
+                'last_name': place.owner.last_name,
+                'email': place.owner.email
             }
 
         amenities_data = [
-            {'id': a.id, 'name': a.name} for a in place.amenities
+            {'id': a.id, 'name': a.name}
+            for a in place.amenities
         ]
 
         reviews_data = [
@@ -109,7 +109,7 @@ class PlaceResource(Resource):
                 'id': r.id, 'text': r.text,
                 'rating': r.rating, 'user_id': r.user_id
             }
-            for r in facade.get_reviews_by_place(place_id)
+            for r in place.reviews
         ]
 
         return {
@@ -158,7 +158,7 @@ class PlaceResource(Resource):
             'latitude': updated_place.latitude,
             'longitude': updated_place.longitude,
             'owner_id': updated_place.owner_id,
-            'amenities': [a.id for a in updated_place.amenities]
+            'amenities': [{'id': a.id, 'name': a.name} for a in updated_place.amenities]
         }, 200
 
 

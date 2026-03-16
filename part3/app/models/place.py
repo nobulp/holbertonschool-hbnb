@@ -1,67 +1,48 @@
 from app.models.base_model import BaseModel
-from app.models.user import User
+from app import db
+from sqlalchemy.orm import validates
 
+# Table d'association many-to-many Place↔Amenity
+place_amenity = db.Table('place_amenity',
+    db.Column('place_id', db.String(36), db.ForeignKey('places.id'), primary_key=True),
+    db.Column('amenity_id', db.String(36), db.ForeignKey('amenities.id'), primary_key=True)
+)
 
 class Place(BaseModel):
-    def __init__(self, title, description, price, latitude, longitude,
-                 owner: User, amenities=None):
-        super().__init__()
-        self.title = title
-        self.description = description
-        self.price = price
-        self.latitude = latitude
-        self.longitude = longitude
-        self.owner = owner
-        self.reviews = []
-        self.amenities = amenities if amenities is not None else []
+    __tablename__ = 'places'
 
-    @property
-    def owner_id(self):
-        return self.owner.id
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(500))
+    price = db.Column(db.Float, nullable=False)
+    latitude = db.Column(db.Float, nullable=False)
+    longitude = db.Column(db.Float, nullable=False)
+    owner_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
 
-    @property
-    def title(self):
-        return self._title
+    # Relationships
+    reviews = db.relationship('Review', backref='place', lazy=True)
+    amenities = db.relationship('Amenity', secondary=place_amenity, lazy='subquery',
+                                backref=db.backref('places', lazy=True))
 
-    @title.setter
-    def title(self, value):
+    @validates('title')
+    def validate_title(self, key, value):
         if not value or len(value) > 100:
-            raise ValueError(
-                "Title is required and must be 100 characters max")
-        self._title = value
+            raise ValueError("Title is required and must be 100 characters max")
+        return value
 
-    @property
-    def price(self):
-        return self._price
-
-    @price.setter
-    def price(self, value):
+    @validates('price')
+    def validate_price(self, key, value):
         if value is None or value < 0:
             raise ValueError("Price must be a non-negative number")
-        self._price = value
+        return value
 
-    @property
-    def latitude(self):
-        return self._latitude
-
-    @latitude.setter
-    def latitude(self, value):
+    @validates('latitude')
+    def validate_latitude(self, key, value):
         if value is None or not (-90 <= value <= 90):
             raise ValueError("Latitude must be between -90 and 90")
-        self._latitude = value
+        return value
 
-    @property
-    def longitude(self):
-        return self._longitude
-
-    @longitude.setter
-    def longitude(self, value):
+    @validates('longitude')
+    def validate_longitude(self, key, value):
         if value is None or not (-180 <= value <= 180):
             raise ValueError("Longitude must be between -180 and 180")
-        self._longitude = value
-
-    def add_review(self, review):
-        self.reviews.append(review)
-
-    def add_amenity(self, amenity):
-        self.amenities.append(amenity)
+        return value

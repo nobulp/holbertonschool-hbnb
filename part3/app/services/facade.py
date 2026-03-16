@@ -1,5 +1,5 @@
-from app.persistence.repository import InMemoryRepository
-from app.persistence.user_repository import UserRepository
+from app.persistence.repository import SQLAlchemyRepository
+from app.services.user_repository import UserRepository
 from app.models.user import User
 from app.models.amenity import Amenity
 from app.models.place import Place
@@ -10,9 +10,9 @@ class HBnBFacade:
 
     def __init__(self):
         self.user_repo = UserRepository()
-        self.amenity_repo = InMemoryRepository()
-        self.place_repo = InMemoryRepository()
-        self.review_repo = InMemoryRepository()
+        self.amenity_repo = SQLAlchemyRepository(Amenity)
+        self.place_repo = SQLAlchemyRepository(Place)
+        self.review_repo = SQLAlchemyRepository(Review)
 
     # -----------------
     # User operations
@@ -45,29 +45,27 @@ class HBnBFacade:
     # Place operations
     # -----------------
     def create_place(self, place_data):
-        # 1) vérifier owner existe
         owner_id = place_data.get("owner_id")
-        owner = self.get_user(owner_id)
-        if not owner:
+        if not self.get_user(owner_id):
             raise ValueError("Owner not found")
 
-        # 2) vérifier amenities existent (liste d'IDs)
         amenity_ids = place_data.get("amenities", [])
+        amenity_objects = []
         for a_id in amenity_ids:
-            if not self.get_amenity(a_id):
+            amenity = self.get_amenity(a_id)
+            if not amenity:
                 raise ValueError("Amenity not found")
+            amenity_objects.append(amenity)
 
-        # 3) créer Place (owner est un User instance, amenities sont des instances)
-        amenity_objects = [self.get_amenity(a_id) for a_id in amenity_ids]
         place = Place(
             title=place_data.get("title"),
             description=place_data.get("description", ""),
             price=place_data.get("price"),
             latitude=place_data.get("latitude"),
             longitude=place_data.get("longitude"),
-            owner=owner,
-            amenities=amenity_objects,
+            owner_id=owner_id,
         )
+        place.amenities = amenity_objects
         self.place_repo.add(place)
         return place
 
@@ -85,18 +83,17 @@ class HBnBFacade:
         update_data = {}
         for key, value in place_data.items():
             if key == "owner_id":
-                owner = self.get_user(value)
-                if not owner:
+                if not self.get_user(value):
                     raise ValueError("Owner not found")
-                update_data["owner"] = owner
+                update_data["owner_id"] = value
             elif key == "amenities":
                 amenity_objects = []
                 for a_id in value:
-                    a = self.get_amenity(a_id)
-                    if not a:
+                    amenity = self.get_amenity(a_id)
+                    if not amenity:
                         raise ValueError("Amenity not found")
-                    amenity_objects.append(a)
-                update_data["amenities"] = amenity_objects
+                    amenity_objects.append(amenity)
+                place.amenities = amenity_objects
             else:
                 update_data[key] = value
 
@@ -142,8 +139,8 @@ class HBnBFacade:
         review = Review(
             text=review_data.get("text"),
             rating=review_data.get("rating"),
-            place=self.get_place(place_id),
-            user=self.get_user(user_id),
+            place_id=place_id,
+            user_id=user_id,
         )
         self.review_repo.add(review)
         return review
@@ -155,7 +152,10 @@ class HBnBFacade:
         return self.review_repo.get_all()
 
     def get_reviews_by_place(self, place_id):
-        return [r for r in self.review_repo.get_all() if r.place_id == place_id]
+        place = self.get_place(place_id)
+        if not place:
+            return []
+        return place.reviews
 
     def update_review(self, review_id, review_data):
         review = self.get_review(review_id)
@@ -171,15 +171,13 @@ class HBnBFacade:
         update_data = {}
         for key, value in review_data.items():
             if key == "place_id":
-                place = self.get_place(value)
-                if not place:
+                if not self.get_place(value):
                     raise ValueError("Place not found")
-                update_data["place"] = place
+                update_data["place_id"] = value
             elif key == "user_id":
-                user = self.get_user(value)
-                if not user:
+                if not self.get_user(value):
                     raise ValueError("User not found")
-                update_data["user"] = user
+                update_data["user_id"] = value
             else:
                 update_data[key] = value
 
