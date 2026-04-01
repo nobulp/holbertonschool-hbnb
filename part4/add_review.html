@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Review</title>
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <img src="logo.png" alt="HBnB logo" class="logo">
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="place.html">Place Details</a>
+            <a href="add_review.html">Add Review</a>
+            <a href="login.html" class="login-button">Login</a>
+        </nav>
+    </header>
+    <main>
+        <section class="review-section">
+            <form id="review-form" method="post">
+                <h1>Add a Review</h1>
+                <p class="form-copy">You are reviewing <strong>Cozy Studio in Paris</strong>.</p>
+                <label for="review">Your Review:</label>
+                <textarea id="review" name="review" rows="6" required></textarea>
+                <label for="rating">Rating:</label>
+                <select id="rating" name="rating" required>
+                    <option value="">Select a rating</option>
+                    <option value="5">5 - Excellent</option>
+                    <option value="4">4 - Very good</option>
+                    <option value="3">3 - Good</option>
+                    <option value="2">2 - Fair</option>
+                    <option value="1">1 - Poor</option>
+                </select>
+                <button type="submit">Submit Review</button>
+            </form>
+        </section>
+    </main>
+    <footer>
+        <p>All rights reserved.</p>
+    </footer>
+    <script src="scripts.js"></script>
+</body>
+</html>
