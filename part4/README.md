@@ -2,49 +2,157 @@
 
 ## Overview
 
-This directory contains the front-end client for the HBnB project.
-It is built with HTML5, CSS3, and vanilla JavaScript.
+`part4` contains the front-end client for the HBnB project.
+It is built with:
 
-The goal of this part is to provide a simple web interface connected to the API developed in `part3`.
+- HTML5
+- CSS3
+- vanilla JavaScript
+
+This client connects to the API from `part3` and provides the main user flow for:
+
+- logging in
+- browsing places
+- viewing place details
+- submitting a review
+
+## Goals
+
+The purpose of this part is to build a small but functional web client that:
+
+- respects the project structure requested in the tasks
+- communicates with the back-end API using `fetch`
+- stores the JWT token in a cookie
+- updates the UI dynamically without a page reload
+- provides a more polished user experience than a purely static mockup
+
+## Stack
+
+### Front-end
+
+- HTML5
+- CSS3
+- JavaScript ES6
+
+### Back-end dependency
+
+- Python
+- Flask
+- REST API
+- JWT authentication
 
 ## Pages
 
-- `index.html`: main page that displays the list of places
-- `login.html`: login form
-- `place.html`: place details page
-- `add_review.html`: add review form
+### `index.html`
 
-## Files
+Main page of the client.
 
-- `styles.css`: global styles for the client
-- `scripts.js`: client-side JavaScript logic
-- `logo.png`: application logo
-- `icon.png`: favicon
+Features:
+
+- displays the list of places from the API
+- filters places by price
+- shows or hides authentication actions depending on session state
+- links to each place detail page
+
+### `login.html`
+
+Authentication page.
+
+Features:
+
+- login form
+- API call to authenticate the user
+- JWT cookie storage
+- error and success feedback
+
+### `place.html`
+
+Detailed page for one place.
+
+Features:
+
+- loads a specific place using its ID from the URL
+- displays host, price, description, amenities, and reviews
+- shows the add review action when the user is authenticated
+
+### `add_review.html`
+
+Review submission page.
+
+Features:
+
+- restricted to authenticated users
+- loads the current place from the URL
+- sends a review and rating to the API
+- gives feedback on submission state
+
+## Main Files
+
+- `index.html`
+- `login.html`
+- `place.html`
+- `add_review.html`
+- `styles.css`
+- `scripts.js`
+- `logo.png`
+- `icon.png`
+
+Additional visual assets currently used by the interface:
+
+- `place-lake.svg`
+- `place-forest.svg`
+- `place-city.svg`
+- `hero-backdrop.svg`
+- `hero-escape.svg`
 
 ## Implemented Features
 
-### Task 1 - Design
+### 1. Design
 
-- Common layout with `header`, `main`, and `footer`
-- Navigation links between pages
-- Logo with class `logo`
-- Login link with class `login-button`
-- Styled cards, forms, buttons, and layout
+- shared layout across all pages
+- semantic sections with `header`, `main`, and `footer`
+- responsive layout for desktop and mobile
+- premium visual direction with light and dark themes
+- animated hero and subtle motion effects
+- cookie notice and privacy modal
 
-### Task 2 - Login
+### 2. Login
 
-- Login form submission handled with JavaScript
-- Request sent to the API with `fetch`
-- JWT token stored in a cookie after successful login
-- Error message displayed on login failure
-- Redirect to `index.html` after successful login
+- login request sent to the API with `fetch`
+- JWT stored in a cookie named `token`
+- redirect to the home page after success
+- invalid credentials handled with a visible message
 
-### Task 3 - Index
+### 3. View Places
 
-- Places fetched dynamically from the API
-- Cards rendered with JavaScript
-- Login link shown or hidden depending on authentication status
-- Client-side filtering implemented from the dropdown
+- places loaded dynamically from the API
+- cards rendered on the client side
+- client-side filtering by price
+- login/logout actions updated from cookie state
+
+### 4. Place Details
+
+- place ID read from the URL
+- place details fetched from the API
+- amenities and reviews rendered dynamically
+- add review action available only when authenticated
+
+### 5. Add Review
+
+- authentication required
+- place ID read from the URL
+- review text and rating submitted to the API
+- success and error feedback displayed in the form
+
+## Current User Flow
+
+1. Open `index.html`
+2. Browse places
+3. Open `login.html` if authentication is needed
+4. Log in
+5. Return to the home page
+6. Open `place.html?id=<place_id>`
+7. Submit a review from `add_review.html?id=<place_id>`
 
 ## Project Structure
 
@@ -58,100 +166,159 @@ part4/
 ├── styles.css
 ├── scripts.js
 ├── logo.png
-└── icon.png
+├── icon.png
+├── place-lake.svg
+├── place-forest.svg
+├── place-city.svg
+├── hero-backdrop.svg
+└── hero-escape.svg
 ```
 
 ## Requirements
 
+To use this client locally, you need:
+
 - Python 3
-- The API from `part3`
-- A virtual environment for `part3`
+- the API in `part3`
+- a Python virtual environment for `part3`
 
-## How to Run
+## Running the Project
 
-### 1. Start the API
+### Option 1. Recommended: launch from the project root
 
-From `part3`:
+From the repository root:
+
+```bash
+cd /Users/nobu/hbnb-front/holbertonschool-hbnb
+./start.sh
+```
+
+This script:
+
+- starts the Flask API from `part3`
+- starts the static server for `part4`
+- opens `http://localhost:8000/index.html`
+
+To stop the local servers:
+
+```bash
+./stop.sh
+```
+
+### Option 2. Manual launch
+
+#### Start the API
 
 ```bash
 cd /Users/nobu/hbnb-front/holbertonschool-hbnb/part3
-python3 -m venv venv
 source venv/bin/activate
-python3 -m pip install -r requirements.txt
 python3 run.py
 ```
 
-The API runs on:
+API URL:
 
 ```text
 http://127.0.0.1:5000
 ```
 
-### 2. Start the front-end client
-
-From `part4`:
+#### Start the front-end
 
 ```bash
 cd /Users/nobu/hbnb-front/holbertonschool-hbnb/part4
 python3 -m http.server 8000
 ```
 
-Open in the browser:
+Front-end URL:
 
 ```text
 http://localhost:8000/index.html
 ```
 
-## Authentication Flow
+## API Endpoints Used
 
-1. The user fills in the login form in `login.html`
-2. JavaScript sends a `POST` request to:
+The client currently depends on these API routes:
 
-```text
-http://127.0.0.1:5000/api/v1/auth/login
-```
+- `POST /api/v1/auth/login`
+- `GET /api/v1/places/`
+- `GET /api/v1/places/<id>`
+- `POST /api/v1/reviews/`
 
-3. If login succeeds, the API returns a JWT token
-4. The token is stored in a cookie named `token`
-5. The user is redirected to `index.html`
-
-## Places Flow
-
-1. `index.html` loads
-2. JavaScript checks whether the `token` cookie exists
-3. JavaScript fetches places from:
+Base URL used in the client:
 
 ```text
-http://127.0.0.1:5000/api/v1/places/
+http://127.0.0.1:5000/api/v1
 ```
 
-4. The places are rendered dynamically in the page
-5. The dropdown can filter visible places on the client side
+## Authentication
 
-## Testing
+After a successful login:
 
-### Test login
+- the API returns a JWT token
+- the token is stored in a cookie named `token`
+- the navigation updates automatically
+- authenticated pages can use the token in the `Authorization` header
 
-- Open `http://localhost:8000/login.html`
-- Enter valid credentials
-- Verify that:
-  - the login succeeds
-  - a cookie named `token` is created
-  - the user is redirected to `index.html`
+## Accessibility and UX Notes
 
-### Test invalid login
+The client includes:
 
-- Enter wrong credentials
-- Verify that an error message is displayed
+- skip links
+- visible keyboard focus states
+- live regions for dynamic status messages
+- inline error feedback for forms
+- responsive adjustments for mobile
+- reduced-motion support for users who prefer less animation
 
-### Test places page
+## Testing Checklist
 
-- Open `http://localhost:8000/index.html`
-- Verify that places are loaded from the API
-- Change the filter dropdown and verify that cards are shown or hidden
+### Login
+
+- open `login.html`
+- test valid credentials
+- test invalid credentials
+- verify that the `token` cookie is created after success
+
+### Home / Places
+
+- open `index.html`
+- confirm that places are loaded from the API
+- test the price filter
+- test navigation to place details
+
+### Place Details
+
+- open a place from the home page
+- verify host, price, description, amenities, and reviews
+- verify that the add review button appears only when logged in
+
+### Add Review
+
+- log in first
+- open a place
+- click `Add Review`
+- test empty form validation
+- submit a valid review
+
+## Known Limits
+
+This front-end currently does not include:
+
+- user registration
+- place creation
+- place editing or deletion
+- review editing or deletion
+- booking/reservation flow
+- search backed by real API search logic
+
+It mainly covers:
+
+- authentication
+- place browsing
+- place details
+- review submission
 
 ## Notes
 
-- The front-end depends on the API from `part3`
-- If the API is not running, the client cannot log in or fetch places
-- CORS must be enabled in the API for the browser to allow requests from `http://localhost:8000`
+- the front-end depends on `part3`; without the API, the dynamic pages will not work
+- CORS must be enabled in `part3` for requests from `http://localhost:8000`
+- some visual assets are local placeholders and can be replaced with your own images later

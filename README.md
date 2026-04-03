@@ -28,3 +28,21 @@ python run.py
 ## Access the API documentation
 
 Visit: http://127.0.0.1:5000/api/v1/
+## Quick Start
+
+From the project root, you can launch both the API and the front-end with:
+
+```bash
+./start.sh
+```
+
+This will:
+- start the Flask API from `part3`
+- start the static front-end server from `part4`
+- open `http://localhost:8000/index.html`
+
+To stop the local servers later:
+
+```bash
+./stop.sh
+```
