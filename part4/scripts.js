@@ -1077,15 +1077,15 @@ function displayPlaceDetails(place) {
         </div>
         ${canManageReview ? `
           <div class="review-card-actions">
-            <a href="add_review.html?id=${encodeURIComponent(place.id)}&review=${encodeURIComponent(review.id || '')}&mode=edit" class="review-edit-button">Edit</a>
-            <button type="button" class="review-delete-button" data-review-id="${escapeHtml(review.id || '')}">Delete</button>
+            <a href="add_review.html?id=${encodeURIComponent(place.id)}&review=${encodeURIComponent(review.id || '')}&mode=edit" class="details-button details-button--secondary">Edit</a>
+            <button type="button" class="details-button details-button--danger" data-review-delete data-review-id="${escapeHtml(review.id || '')}">Delete</button>
           </div>
         ` : ''}
       </div>
       <p>${escapeHtml(review.text || '')}</p>
     `;
 
-    const deleteButton = reviewCard.querySelector('.review-delete-button');
+    const deleteButton = reviewCard.querySelector('[data-review-delete]');
     if (deleteButton) {
       deleteButton.addEventListener('click', async () => {
         if (!token || !review.id || !window.confirm('Delete this review?')) {

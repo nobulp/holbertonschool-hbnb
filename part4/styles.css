@@ -2353,6 +2353,12 @@ body[data-theme="dark"] .reviews-section {
   gap: 8px;
 }
 
+.review-card-actions .details-button {
+  padding: 7px 14px;
+  font-size: 0.82rem;
+  box-shadow: none;
+}
+
 .review-avatar {
   width: 36px;
   height: 36px;
@@ -2379,58 +2385,6 @@ body[data-theme="dark"] .reviews-section {
   margin-top: 10px;
 }
 
-.review-delete-button {
-  border: 1px solid rgba(199, 99, 66, 0.16);
-  background: rgba(255, 248, 242, 0.56);
-  color: var(--accent);
-  border-radius: 999px;
-  padding: 8px 12px;
-  font: 600 0.8rem/1 inherit;
-  cursor: pointer;
-  transition: background 0.18s, transform 0.18s, border-color 0.18s;
-}
-
-.review-edit-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(214, 171, 149, 0.22);
-  color: var(--text);
-  background: rgba(255, 248, 242, 0.56);
-  font: 600 0.8rem/1 inherit;
-  text-decoration: none;
-  transition: background 0.18s, transform 0.18s, border-color 0.18s;
-}
-
-.review-delete-button:hover,
-.review-delete-button:focus-visible,
-.review-edit-button:hover,
-.review-edit-button:focus-visible {
-  background: rgba(199, 99, 66, 0.1);
-  border-color: rgba(199, 99, 66, 0.28);
-  transform: translateY(-1px);
-}
-
-.review-delete-button:disabled {
-  opacity: 0.6;
-  cursor: wait;
-  transform: none;
-}
-
-body[data-theme="dark"] .review-delete-button {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255, 233, 219, 0.1);
-  color: #F2A87A;
-}
-
-body[data-theme="dark"] .review-edit-button {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255, 233, 219, 0.1);
-  color: var(--text);
-}
 
 /* =====================================================================
    Stars — display
