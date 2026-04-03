@@ -3,43 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Review</title>
+    <meta name="description" content="Write and submit a review for a place on HBnB.">
+    <title>HBnB – Add Review</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <header>
-        <img src="logo.png" alt="HBnB logo" class="logo">
-        <nav>
+        <a href="index.html" class="logo-link">
+            <img src="logo.png" alt="HBnB" class="logo">
+            <span class="logo-name">HBnB</span>
+        </a>
+        <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
-            <a href="place.html">Place Details</a>
-            <a href="add_review.html">Add Review</a>
-            <a href="login.html" class="login-button">Login</a>
+            <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
+                <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+            </button>
+            <a href="login.html" id="login-link" class="login-button">Login</a>
+            <button type="button" id="logout-button" class="logout-button" hidden>Log out</button>
         </nav>
     </header>
-    <main>
-        <section class="review-section">
-            <form id="review-form" method="post">
-                <h1>Add a Review</h1>
-                <p class="form-copy">You are reviewing <strong>Cozy Studio in Paris</strong>.</p>
-                <label for="review">Your Review:</label>
-                <textarea id="review" name="review" rows="6" required></textarea>
-                <label for="rating">Rating:</label>
-                <select id="rating" name="rating" required>
-                    <option value="">Select a rating</option>
-                    <option value="5">5 - Excellent</option>
-                    <option value="4">4 - Very good</option>
-                    <option value="3">3 - Good</option>
-                    <option value="2">2 - Fair</option>
-                    <option value="1">1 - Poor</option>
-                </select>
+
+    <main id="main-content">
+        <section class="review-section" aria-labelledby="review-heading">
+            <form id="review-form" method="post" novalidate>
+                <h1 id="review-heading">Add a Review</h1>
+                <p class="form-copy">
+                    You are reviewing <strong id="reviewed-place-name">this place</strong>.
+                </p>
+                <p id="review-message" class="form-message" aria-live="polite" role="status"></p>
+
+                <label for="review">Your review</label>
+                <textarea
+                    id="review"
+                    name="review"
+                    rows="6"
+                    required
+                    aria-required="true"
+                    aria-describedby="review-message"
+                    placeholder="Share your experience…"
+                ></textarea>
+
+                <fieldset class="star-rating-group">
+                    <legend>Rating</legend>
+                    <!-- Inputs ordered 5→1; flex row-reverse shows them 1→5 visually -->
+                    <div class="star-rating" role="group" aria-label="Select a rating from 1 to 5">
+                        <input type="radio" id="star5" name="rating" value="5" required aria-required="true">
+                        <label for="star5" title="5 – Excellent" aria-label="5 stars – Excellent">★</label>
+                        <input type="radio" id="star4" name="rating" value="4">
+                        <label for="star4" title="4 – Very good" aria-label="4 stars – Very good">★</label>
+                        <input type="radio" id="star3" name="rating" value="3">
+                        <label for="star3" title="3 – Good" aria-label="3 stars – Good">★</label>
+                        <input type="radio" id="star2" name="rating" value="2">
+                        <label for="star2" title="2 – Fair" aria-label="2 stars – Fair">★</label>
+                        <input type="radio" id="star1" name="rating" value="1">
+                        <label for="star1" title="1 – Poor" aria-label="1 star – Poor">★</label>
+                    </div>
+                    <span class="star-hint">Click a star to rate</span>
+                </fieldset>
+
                 <button type="submit">Submit Review</button>
             </form>
         </section>
     </main>
+
     <footer>
-        <p>All rights reserved.</p>
+        <p>
+            &copy; <span id="footer-year">2024</span> HBnB &bull; All rights reserved &bull;
+            <button type="button" class="link-button" id="privacy-footer-btn">Privacy Notice</button>
+        </p>
     </footer>
+
+    <!-- GDPR cookie notice banner -->
+    <div id="cookie-banner" class="hidden" role="region" aria-label="Cookie notice" aria-live="polite">
+        <p>
+            This site uses a strictly necessary session cookie for authentication only.
+            No tracking or advertising cookies are used.
+        </p>
+        <div class="cookie-actions">
+            <button type="button" class="btn-cookie-accept" id="cookie-accept">Got it</button>
+            <button type="button" class="btn-cookie-more" id="cookie-more">Privacy notice</button>
+        </div>
+    </div>
+
+    <!-- Privacy notice modal -->
+    <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
+        <h2 id="privacy-modal-title">Privacy Notice</h2>
+        <section>
+            <h3>Data collected</h3>
+            <p>
+                When you log in, your email address and password are sent to our API over a secure
+                connection. A JWT session token is then stored in a browser cookie to keep you
+                authenticated during your visit.
+            </p>
+        </section>
+        <section>
+            <h3>Cookie used</h3>
+            <p>
+                <strong>token</strong> — session cookie, expires after 1&nbsp;day. Strictly
+                necessary for authentication. Not used for tracking or advertising.
+            </p>
+        </section>
+        <section>
+            <h3>Your rights (GDPR / RGPD)</h3>
+            <ul>
+                <li>Right of access to your personal data</li>
+                <li>Right to rectification</li>
+                <li>Right to erasure ("right to be forgotten")</li>
+                <li>Right to data portability</li>
+            </ul>
+            <p>
+                To exercise your rights, contact the site administrator. You can delete your session
+                cookie at any time by logging out or clearing your browser cookies.
+            </p>
+        </section>
+        <button type="button" id="privacy-modal-close">Close</button>
+    </dialog>
+
     <script src="scripts.js"></script>
 </body>
 </html>

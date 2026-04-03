@@ -1,0 +1,59 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="800" y1="40" x2="800" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6A8598"/>
+      <stop offset="0.35" stop-color="#425965"/>
+      <stop offset="0.72" stop-color="#1B2C35"/>
+      <stop offset="1" stop-color="#101920"/>
+    </linearGradient>
+    <linearGradient id="mountainLight" x1="600" y1="140" x2="600" y2="660" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#415763"/>
+      <stop offset="1" stop-color="#1D2B33"/>
+    </linearGradient>
+    <linearGradient id="mountainDark" x1="1000" y1="120" x2="1000" y2="700" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#31444F"/>
+      <stop offset="1" stop-color="#10181F"/>
+    </linearGradient>
+    <linearGradient id="forest" x1="800" y1="380" x2="800" y2="760" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#283932"/>
+      <stop offset="1" stop-color="#090E11"/>
+    </linearGradient>
+    <linearGradient id="water" x1="800" y1="620" x2="800" y2="1000" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#132028"/>
+      <stop offset="0.55" stop-color="#0A1117"/>
+      <stop offset="1" stop-color="#05080C"/>
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1120 290) rotate(90) scale(170)">
+      <stop stop-color="#FFE0A1" stop-opacity="0.95"/>
+      <stop offset="0.3" stop-color="#FFD98B" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#FFD98B" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softBlur" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+  </defs>
+
+  <rect width="1600" height="1000" fill="url(#sky)"/>
+  <rect width="1600" height="1000" fill="url(#sunGlow)"/>
+
+  <path d="M0 430L180 300L310 350L480 210L650 355L860 180L1085 355L1290 135L1600 420V670H0V430Z" fill="url(#mountainDark)"/>
+  <path d="M0 520L180 430L330 470L470 360L620 455L820 315L1020 455L1240 340L1600 520V690H0V520Z" fill="url(#mountainLight)"/>
+
+  <g opacity="0.96">
+    <path d="M0 520C95 455 145 435 220 450C320 470 335 555 420 555C510 555 550 420 650 425C730 430 785 525 875 525C975 525 1045 390 1145 398C1235 405 1295 520 1380 520C1455 520 1510 470 1600 432V735H0V520Z" fill="url(#forest)"/>
+  </g>
+
+  <g opacity="0.65">
+    <path d="M0 625H1600V1000H0V625Z" fill="url(#water)"/>
+    <path d="M0 650C105 625 140 665 250 665C365 665 410 620 525 620C665 620 715 690 850 690C985 690 1040 640 1170 640C1300 640 1420 700 1600 660V1000H0V650Z" fill="#0A1218"/>
+  </g>
+
+  <g opacity="0.16" filter="url(#softBlur)">
+    <ellipse cx="1120" cy="665" rx="365" ry="56" fill="#D9BA84"/>
+  </g>
+
+  <g opacity="0.14">
+    <path d="M0 700C160 720 300 736 470 742C660 748 855 738 1005 726C1185 710 1380 690 1600 700" stroke="#CFE4EB" stroke-width="6" stroke-linecap="round"/>
+    <path d="M0 760C140 778 280 792 460 798C650 804 860 796 1035 782C1230 766 1420 742 1600 752" stroke="#A8C1CB" stroke-width="4" stroke-linecap="round"/>
+  </g>
+</svg>

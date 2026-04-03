@@ -3,44 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>List of Places</title>
+    <meta name="description" content="Browse and discover design-forward stays with HBnB.">
+    <title>HBnB – Stay Somewhere Better</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <header>
-        <img src="logo.png" alt="HBnB logo" class="logo">
-        <nav>
-            <a href="index.html">Home</a>
-            <a href="place.html">Place Details</a>
-            <a href="add_review.html">Add Review</a>
+        <a href="index.html" class="logo-link">
+            <img src="logo.png" alt="HBnB" class="logo">
+            <span class="logo-name">HBnB</span>
+        </a>
+        <nav aria-label="Main navigation">
+            <a href="index.html" aria-current="page">Home</a>
+            <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
+                <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+            </button>
             <a href="login.html" id="login-link" class="login-button">Login</a>
+            <button type="button" id="logout-button" class="logout-button" hidden>Log out</button>
         </nav>
     </header>
-    <main>
-        <section class="hero">
-            <div>
-                <p class="eyebrow">Find your next stay</p>
-                <h1>Comfortable places for every kind of trip.</h1>
-                <p class="hero-copy">Browse a curated selection of homes, beach escapes, and mountain cabins.</p>
+
+    <main id="main-content" class="home-layout">
+        <aside class="discovery-rail" aria-label="Inspiration">
+            <p class="rail-kicker">Explore and discover the best places near your location.</p>
+            <div class="rail-feature-card rail-feature-card--tall">
+                <div class="rail-feature-card__image rail-feature-card__image--lake"></div>
+                <div class="rail-feature-card__meta">
+                    <p class="rail-label">Featured escape</p>
+                    <h2>Bandung</h2>
+                    <p>Quiet water, crisp air, and a cabin hidden in the trees.</p>
+                </div>
             </div>
-        </section>
-        <section id="filter" class="filter-bar">
-            <label for="price-filter">Max Price</label>
-            <select id="price-filter" name="price-filter">
-                <option value="all">All</option>
-                <option value="10">10</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
-            </select>
-        </section>
-        <section id="places-list" class="places-grid">
-            <p id="places-status" class="places-status">Loading places...</p>
+
+            <section class="rail-cluster" aria-labelledby="rail-journey-title">
+                <div class="rail-cluster__header">
+                    <h2 id="rail-journey-title">Find your journey</h2>
+                    <p>Small edits, stronger moods, better stays.</p>
+                </div>
+                <div class="rail-mini-grid">
+                    <article class="rail-mini-card">
+                        <div class="rail-mini-card__image rail-mini-card__image--villa"></div>
+                        <h3>Forest villas</h3>
+                        <p>Misty mornings and slow breakfasts.</p>
+                    </article>
+                    <article class="rail-mini-card">
+                        <div class="rail-mini-card__image rail-mini-card__image--cabin"></div>
+                        <h3>Cabins</h3>
+                        <p>Dark wood, warm light, mountain air.</p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="rail-cluster" aria-labelledby="rail-experiences-title">
+                <div class="rail-cluster__header">
+                    <h2 id="rail-experiences-title">Discover nearby</h2>
+                    <p>Editorial selections with a more cinematic feel.</p>
+                </div>
+                <div class="rail-feature-card rail-feature-card--wide">
+                    <div class="rail-feature-card__image rail-feature-card__image--sunset"></div>
+                    <div class="rail-feature-card__meta">
+                        <p class="rail-label">Weekend edit</p>
+                        <h3>Golden hour stays</h3>
+                    </div>
+                </div>
+            </section>
+        </aside>
+
+        <section class="main-stage">
+            <section class="hero hero--landscape" aria-labelledby="hero-heading">
+                <div class="hero-nav-line">
+                    <span class="hero-brand">hbnb</span>
+                    <span class="hero-line"></span>
+                    <span class="hero-caption">Place to stay</span>
+                </div>
+                <div class="hero-search-shell" aria-label="Search inspiration">
+                    <div class="hero-search-segment">
+                        <span class="hero-search-label">Location</span>
+                        <span class="hero-search-value">Where are you going?</span>
+                    </div>
+                    <div class="hero-search-segment">
+                        <span class="hero-search-label">Check in</span>
+                        <span class="hero-search-value">Add dates</span>
+                    </div>
+                    <div class="hero-search-segment">
+                        <span class="hero-search-label">Check out</span>
+                        <span class="hero-search-value">Add dates</span>
+                    </div>
+                    <div class="hero-search-segment">
+                        <span class="hero-search-label">Guests</span>
+                        <span class="hero-search-value">Add guests</span>
+                    </div>
+                    <div class="hero-search-action" aria-hidden="true">⌕</div>
+                </div>
+                <div class="hero-content hero-content--overlay">
+                    <p class="eyebrow">Curated stays</p>
+                    <h1 id="hero-heading">Let your curiosity do the booking.</h1>
+                    <p class="hero-copy">A more cinematic way to browse destinations, cabins, and stays with atmosphere.</p>
+                    <div class="hero-tags" aria-label="HBnB categories">
+                        <span>Lake reflections</span>
+                        <span>Forest cabins</span>
+                        <span>Midnight check-ins</span>
+                    </div>
+                </div>
+                <div class="hero-scene">
+                    <div class="hero-waterline"></div>
+                    <div class="hero-camp"></div>
+                </div>
+            </section>
+
+            <section class="listing-panel" aria-labelledby="listing-title">
+                <div class="listing-panel__header">
+                    <div>
+                        <p class="eyebrow eyebrow--dark">Explore nearby</p>
+                        <h2 id="listing-title">Editorial stays near your location.</h2>
+                    </div>
+                    <p class="listing-panel__copy">Use the price cap to tighten the mood without reloading the page.</p>
+                </div>
+
+                <section id="filter" class="filter-bar" aria-label="Filter places by price">
+                    <label for="price-filter">Max price per night</label>
+                    <select id="price-filter" name="price-filter">
+                        <option value="all">All prices</option>
+                        <option value="10">Up to $10</option>
+                        <option value="50">Up to $50</option>
+                        <option value="100">Up to $100</option>
+                    </select>
+                </section>
+
+                <section id="places-list" class="places-grid" aria-label="Available places" aria-live="polite">
+                    <p id="places-status" class="places-status">Loading places...</p>
+                </section>
+            </section>
         </section>
     </main>
+
     <footer>
-        <p>All rights reserved.</p>
+        <p>
+            &copy; <span id="footer-year">2024</span> HBnB &bull; All rights reserved &bull;
+            <button type="button" class="link-button" id="privacy-footer-btn">Privacy Notice</button>
+        </p>
     </footer>
+
+    <!-- GDPR cookie notice banner -->
+    <div id="cookie-banner" class="hidden" role="region" aria-label="Cookie notice" aria-live="polite">
+        <p>
+            This site uses a strictly necessary session cookie for authentication only.
+            No tracking or advertising cookies are used.
+        </p>
+        <div class="cookie-actions">
+            <button type="button" class="btn-cookie-accept" id="cookie-accept">Got it</button>
+            <button type="button" class="btn-cookie-more" id="cookie-more">Privacy notice</button>
+        </div>
+    </div>
+
+    <!-- Privacy notice modal -->
+    <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
+        <h2 id="privacy-modal-title">Privacy Notice</h2>
+        <section>
+            <h3>Data collected</h3>
+            <p>
+                When you log in, your email address and password are sent to our API over a secure
+                connection. A JWT session token is then stored in a browser cookie to keep you
+                authenticated during your visit.
+            </p>
+        </section>
+        <section>
+            <h3>Cookie used</h3>
+            <p>
+                <strong>token</strong> — session cookie, expires after 1&nbsp;day. Strictly
+                necessary for authentication. Not used for tracking or advertising.
+            </p>
+        </section>
+        <section>
+            <h3>Your rights (GDPR / RGPD)</h3>
+            <ul>
+                <li>Right of access to your personal data</li>
+                <li>Right to rectification</li>
+                <li>Right to erasure ("right to be forgotten")</li>
+                <li>Right to data portability</li>
+            </ul>
+            <p>
+                To exercise your rights, contact the site administrator. You can delete your session
+                cookie at any time by logging out or clearing your browser cookies.
+            </p>
+        </section>
+        <button type="button" id="privacy-modal-close">Close</button>
+    </dialog>
+
     <script src="scripts.js"></script>
 </body>
 </html>

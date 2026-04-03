@@ -3,39 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <meta name="description" content="Log in to your HBnB account to book places and leave reviews.">
+    <title>HBnB – Login</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <header>
-        <img src="logo.png" alt="HBnB logo" class="logo">
-        <nav>
+        <a href="index.html" class="logo-link">
+            <img src="logo.png" alt="HBnB" class="logo">
+            <span class="logo-name">HBnB</span>
+        </a>
+        <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
-            <a href="place.html">Place Details</a>
-            <a href="add_review.html">Add Review</a>
-            <a href="login.html" class="login-button">Login</a>
+            <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
+                <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+            </button>
+            <a href="login.html" id="login-link" class="login-button" aria-current="page">Login</a>
+            <button type="button" id="logout-button" class="logout-button" hidden>Log out</button>
         </nav>
     </header>
-    <main>
-        <section class="login-section">
-            <form id="login-form" method="post">
-                <h1>Login</h1>
-                <p class="form-copy">Sign in to book a place or leave a review.</p>
-                <p id="login-message" class="form-message" aria-live="polite"></p>
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" autocomplete="email" required>
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" autocomplete="current-password" required>
+    <main id="main-content">
+        <section class="login-section" aria-labelledby="login-heading">
+            <form id="login-form" method="post" novalidate>
+                <h1 id="login-heading">Login</h1>
+                <p class="form-copy">Sign in to book a place or leave a review.</p>
+                <p id="login-message" class="form-message" aria-live="polite" role="status"></p>
+
+                <label for="email">Email address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                    aria-required="true"
+                    aria-describedby="login-message"
+                >
+
+                <label for="password">Password</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    autocomplete="current-password"
+                    required
+                    aria-required="true"
+                >
 
                 <button type="submit">Login</button>
             </form>
         </section>
     </main>
+
     <footer>
-        <p>All rights reserved.</p>
+        <p>
+            &copy; <span id="footer-year">2024</span> HBnB &bull; All rights reserved &bull;
+            <button type="button" class="link-button" id="privacy-footer-btn">Privacy Notice</button>
+        </p>
     </footer>
+
+    <!-- GDPR cookie notice banner -->
+    <div id="cookie-banner" class="hidden" role="region" aria-label="Cookie notice" aria-live="polite">
+        <p>
+            This site uses a strictly necessary session cookie for authentication only.
+            No tracking or advertising cookies are used.
+        </p>
+        <div class="cookie-actions">
+            <button type="button" class="btn-cookie-accept" id="cookie-accept">Got it</button>
+            <button type="button" class="btn-cookie-more" id="cookie-more">Privacy notice</button>
+        </div>
+    </div>
+
+    <!-- Privacy notice modal -->
+    <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
+        <h2 id="privacy-modal-title">Privacy Notice</h2>
+        <section>
+            <h3>Data collected</h3>
+            <p>
+                When you log in, your email address and password are sent to our API over a secure
+                connection. A JWT session token is then stored in a browser cookie to keep you
+                authenticated during your visit.
+            </p>
+        </section>
+        <section>
+            <h3>Cookie used</h3>
+            <p>
+                <strong>token</strong> — session cookie, expires after 1&nbsp;day. Strictly
+                necessary for authentication. Not used for tracking or advertising.
+            </p>
+        </section>
+        <section>
+            <h3>Your rights (GDPR / RGPD)</h3>
+            <ul>
+                <li>Right of access to your personal data</li>
+                <li>Right to rectification</li>
+                <li>Right to erasure ("right to be forgotten")</li>
+                <li>Right to data portability</li>
+            </ul>
+            <p>
+                To exercise your rights, contact the site administrator. You can delete your session
+                cookie at any time by logging out or clearing your browser cookies.
+            </p>
+        </section>
+        <button type="button" id="privacy-modal-close">Close</button>
+    </dialog>
+
     <script src="scripts.js"></script>
 </body>
 </html>

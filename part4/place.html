@@ -3,70 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Place Details</title>
+    <meta name="description" content="View detailed information about a place on HBnB, including amenities and reviews.">
+    <title>HBnB – Place Details</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
     <header>
-        <img src="logo.png" alt="HBnB logo" class="logo">
-        <nav>
+        <a href="index.html" class="logo-link">
+            <img src="logo.png" alt="HBnB" class="logo">
+            <span class="logo-name">HBnB</span>
+        </a>
+        <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
-            <a href="place.html">Place Details</a>
-            <a href="add_review.html">Add Review</a>
-            <a href="login.html" class="login-button">Login</a>
+            <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
+                <span class="theme-toggle-icon" aria-hidden="true">☾</span>
+            </button>
+            <a href="login.html" id="login-link" class="login-button">Login</a>
+            <button type="button" id="logout-button" class="logout-button" hidden>Log out</button>
         </nav>
     </header>
-    <main>
-        <section class="place-details">
+
+    <main id="main-content">
+        <section class="place-details" aria-labelledby="place-title">
             <div class="place-heading">
                 <div>
                     <p class="eyebrow">Featured stay</p>
-                    <h1>Cozy Studio in Paris</h1>
+                    <h1 id="place-title">Loading place...</h1>
                 </div>
-                <a href="add_review.html" class="details-button">Add Review</a>
+                <div id="add-review" class="add-review" hidden>
+                    <a href="add_review.html" id="add-review-link" class="details-button">Add Review</a>
+                </div>
             </div>
-            <div class="place-info-grid">
-                <article class="place-info">
-                    <h2>Host</h2>
-                    <p>Hosted by Claire Martin</p>
-                </article>
-                <article class="place-info">
-                    <h2>Price</h2>
-                    <p>$120 per night</p>
-                </article>
-                <article class="place-info">
-                    <h2>Description</h2>
-                    <p>Modern studio with natural light, a compact kitchen, fast Wi-Fi, and easy access to central Paris.</p>
-                </article>
-                <article class="place-info">
-                    <h2>Amenities</h2>
-                    <ul class="amenities-list">
-                        <li>Wi-Fi</li>
-                        <li>Kitchen</li>
-                        <li>Workspace</li>
-                        <li>City view</li>
-                    </ul>
-                </article>
-            </div>
+            <p id="place-status" class="places-status">Loading place details...</p>
+            <div id="place-details-content" class="place-info-grid" aria-live="polite"></div>
         </section>
-        <section id="reviews" class="reviews-section">
-            <h2>Reviews</h2>
-            <article class="review-card">
-                <h3>Sophie</h3>
-                <p class="rating">Rating: 5/5</p>
-                <p>Beautiful place, quiet street, and everything was spotless.</p>
-            </article>
-            <article class="review-card">
-                <h3>Lucas</h3>
-                <p class="rating">Rating: 4/5</p>
-                <p>Excellent location and smooth check-in. The space was compact but very comfortable.</p>
-            </article>
+
+        <section id="reviews" class="reviews-section" aria-labelledby="reviews-heading">
+            <h2 id="reviews-heading">Reviews</h2>
+            <div id="reviews-list" class="reviews-grid" aria-live="polite">
+                <p id="reviews-status" class="places-status">Loading reviews...</p>
+            </div>
         </section>
     </main>
+
     <footer>
-        <p>All rights reserved.</p>
+        <p>
+            &copy; <span id="footer-year">2024</span> HBnB &bull; All rights reserved &bull;
+            <button type="button" class="link-button" id="privacy-footer-btn">Privacy Notice</button>
+        </p>
     </footer>
+
+    <!-- GDPR cookie notice banner -->
+    <div id="cookie-banner" class="hidden" role="region" aria-label="Cookie notice" aria-live="polite">
+        <p>
+            This site uses a strictly necessary session cookie for authentication only.
+            No tracking or advertising cookies are used.
+        </p>
+        <div class="cookie-actions">
+            <button type="button" class="btn-cookie-accept" id="cookie-accept">Got it</button>
+            <button type="button" class="btn-cookie-more" id="cookie-more">Privacy notice</button>
+        </div>
+    </div>
+
+    <!-- Privacy notice modal -->
+    <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
+        <h2 id="privacy-modal-title">Privacy Notice</h2>
+        <section>
+            <h3>Data collected</h3>
+            <p>
+                When you log in, your email address and password are sent to our API over a secure
+                connection. A JWT session token is then stored in a browser cookie to keep you
+                authenticated during your visit.
+            </p>
+        </section>
+        <section>
+            <h3>Cookie used</h3>
+            <p>
+                <strong>token</strong> — session cookie, expires after 1&nbsp;day. Strictly
+                necessary for authentication. Not used for tracking or advertising.
+            </p>
+        </section>
+        <section>
+            <h3>Your rights (GDPR / RGPD)</h3>
+            <ul>
+                <li>Right of access to your personal data</li>
+                <li>Right to rectification</li>
+                <li>Right to erasure ("right to be forgotten")</li>
+                <li>Right to data portability</li>
+            </ul>
+            <p>
+                To exercise your rights, contact the site administrator. You can delete your session
+                cookie at any time by logging out or clearing your browser cookies.
+            </p>
+        </section>
+        <button type="button" id="privacy-modal-close">Close</button>
+    </dialog>
+
     <script src="scripts.js"></script>
 </body>
 </html>
