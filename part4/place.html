@@ -18,6 +18,7 @@
         <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
             <a href="add_place.html" id="add-place-link" hidden>Add Place</a>
+            <a href="my_places.html" id="my-places-link" hidden>My Places</a>
             <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
                 <span class="theme-toggle-icon" aria-hidden="true">☾</span>
             </button>
@@ -30,8 +31,13 @@
         <section class="page-hero page-hero--detail" aria-labelledby="page-hero-detail">
             <div class="page-hero-topline">
                 <h1 id="page-hero-detail">Loading place...</h1>
-                <div id="add-review" class="add-review add-review--hero" hidden>
+                <div id="place-hero-actions" class="place-hero-actions" hidden>
+                    <div id="edit-place" class="add-review add-review--hero" hidden>
+                        <a href="add_place.html" id="edit-place-link" class="details-button">Edit Place</a>
+                    </div>
+                    <div id="add-review" class="add-review add-review--hero" hidden>
                     <a href="add_review.html" id="add-review-link" class="details-button">Add Review</a>
+                    </div>
                 </div>
             </div>
             <p id="place-hero-description" class="page-hero-copy">Loading description...</p>

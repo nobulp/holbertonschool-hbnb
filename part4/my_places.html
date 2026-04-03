@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Browse and discover design-forward stays with HBnB.">
-    <title>HBnB – Stay Somewhere Better</title>
+    <meta name="description" content="View and manage the places you created on HBnB.">
+    <title>HBnB – My Places</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -16,9 +16,9 @@
             <span class="logo-name">HBnB</span>
         </a>
         <nav aria-label="Main navigation">
-            <a href="index.html" aria-current="page">Home</a>
+            <a href="index.html">Home</a>
             <a href="add_place.html" id="add-place-link" hidden>Add Place</a>
-            <a href="my_places.html" id="my-places-link" hidden>My Places</a>
+            <a href="my_places.html" id="my-places-link" aria-current="page" hidden>My Places</a>
             <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
                 <span class="theme-toggle-icon" aria-hidden="true">☾</span>
             </button>
@@ -27,49 +27,20 @@
         </nav>
     </header>
 
-    <main id="main-content" class="home-layout home-layout--minimal" tabindex="-1">
-        <section class="main-stage">
-            <section class="hero hero--landscape hero--minimal" aria-labelledby="hero-heading" data-reveal="hero">
-                <div class="hero-nav-line">
-                    <span class="hero-brand">hbnb</span>
-                    <span class="hero-line"></span>
-                    <span class="hero-caption">Make memories</span>
-                </div>
-                <div class="hero-content hero-content--minimal">
-                    <h1 id="hero-heading">Find a place that fits your trip.</h1>
-                    <p class="hero-copy">Choose a place that feels right, settle in, and make the stay part of the memory.</p>
-                    <div class="hero-minimal-meta" aria-label="HBnB highlights">
-                        <span>Compare stays in seconds</span>
-                        <span>Filter by your budget</span>
-                        <span>Book the option that suits you best</span>
-                    </div>
-                </div>
-                <div class="hero-scene" aria-hidden="true">
-                    <div class="hero-waterline"></div>
-                    <div class="hero-camp"></div>
-                </div>
-            </section>
+    <main id="main-content" class="page-shell" tabindex="-1">
+        <section class="page-hero page-hero--compact" aria-labelledby="my-places-hero">
+            <h1 id="my-places-hero">Manage the places you host.</h1>
+            <p class="page-hero-copy">Open a place, update its details, and keep your listings in shape.</p>
+        </section>
 
-            <section class="listing-panel listing-panel--minimal" aria-labelledby="listing-title" data-reveal="panel">
-                <div class="listing-panel__header listing-panel__header--minimal">
-                    <div>
-                        <h2 id="listing-title">Places available now.</h2>
-                    </div>
+        <section class="listing-panel listing-panel--minimal" aria-labelledby="my-places-heading">
+            <div class="listing-panel__header listing-panel__header--minimal">
+                <div>
+                    <h2 id="my-places-heading">Your places.</h2>
                 </div>
-
-                <section id="filter" class="filter-bar" aria-label="Filter places by price">
-                    <label for="price-filter">Max price per night</label>
-                    <select id="price-filter" name="price-filter">
-                        <option value="all">All prices</option>
-                        <option value="10">Up to $10</option>
-                        <option value="50">Up to $50</option>
-                        <option value="100">Up to $100</option>
-                    </select>
-                </section>
-
-                <section id="places-list" class="places-grid" aria-label="Available places" aria-live="polite">
-                    <p id="places-status" class="places-status" role="status" aria-live="polite" aria-atomic="true">Loading places...</p>
-                </section>
+            </div>
+            <section id="my-places-list" class="places-grid" aria-live="polite">
+                <p id="my-places-status" class="places-status" role="status" aria-live="polite" aria-atomic="true">Loading your places...</p>
             </section>
         </section>
     </main>
@@ -81,7 +52,6 @@
         </p>
     </footer>
 
-    <!-- GDPR cookie notice banner -->
     <div id="cookie-banner" class="hidden" role="region" aria-label="Cookie notice" aria-live="polite">
         <p>
             This site uses a strictly necessary session cookie for authentication only.
@@ -93,7 +63,6 @@
         </div>
     </div>
 
-    <!-- Privacy notice modal -->
     <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
         <div class="privacy-modal-topbar">
             <div>

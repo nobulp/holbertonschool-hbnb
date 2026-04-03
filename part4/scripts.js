@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupScrollReveal();
   setupLoginForm();
   setupIndexPage();
+  setupMyPlacesPage();
   setupPlacePage();
   setupAddReviewPage();
   setupAddPlacePage();
@@ -50,6 +51,7 @@ function setupNav() {
   const loginLink = document.getElementById('login-link');
   const logoutButton = document.getElementById('logout-button');
   const addPlaceLink = document.getElementById('add-place-link');
+  const myPlacesLink = document.getElementById('my-places-link');
 
   if (loginLink) {
     loginLink.hidden = !!token;
@@ -58,6 +60,11 @@ function setupNav() {
   if (addPlaceLink) {
     addPlaceLink.hidden = !token;
     addPlaceLink.setAttribute('aria-hidden', String(!token));
+  }
+
+  if (myPlacesLink) {
+    myPlacesLink.hidden = !token;
+    myPlacesLink.setAttribute('aria-hidden', String(!token));
   }
 
   if (logoutButton) {
@@ -395,6 +402,93 @@ function setupIndexPage() {
   });
 }
 
+function setupMyPlacesPage() {
+  const placesList = document.getElementById('my-places-list');
+  const statusElement = document.getElementById('my-places-status');
+
+  if (!placesList || !statusElement) {
+    return;
+  }
+
+  const token = getAuthToken();
+
+  if (!token) {
+    redirectToIndexWithNotice('Please log in to view your places.');
+    return;
+  }
+
+  loadMyPlaces(token, placesList, statusElement);
+}
+
+async function loadMyPlaces(token, placesList, statusElement) {
+  const currentUserId = getJwtIdentityFromToken(token);
+  const headers = { Authorization: `Bearer ${token}` };
+  const listingPanel = placesList.closest('.listing-panel--minimal');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/places/`, { headers });
+    const places = await response.json().catch(() => []);
+
+    if (!response.ok || !Array.isArray(places)) {
+      throw new Error('Unable to load your places.');
+    }
+
+    const details = await Promise.all(
+      places.map(async (place) => {
+        if (!place?.id) {
+          return null;
+        }
+
+        try {
+          const detailResponse = await fetch(`${API_BASE_URL}/places/${encodeURIComponent(place.id)}`, { headers });
+          const detail = await detailResponse.json().catch(() => null);
+          return detailResponse.ok ? detail : null;
+        } catch {
+          return null;
+        }
+      })
+    );
+
+    const ownedPlaces = details.filter((place) => place && (place.owner?.id === currentUserId));
+
+    statusElement.remove();
+    placesList.innerHTML = '';
+
+    if (!ownedPlaces.length) {
+      const emptyState = document.createElement('p');
+      emptyState.className = 'places-status places-status--empty';
+      emptyState.textContent = 'You have not published any places yet. Create one and it will appear here.';
+      placesList.appendChild(emptyState);
+      if (listingPanel) {
+        listingPanel.classList.add('is-visible', 'listing-panel--empty');
+      }
+      return;
+    }
+
+    if (listingPanel) {
+      listingPanel.classList.remove('listing-panel--empty');
+    }
+
+    ownedPlaces.forEach((place, index) => {
+      const card = createPlaceCard(place, index, {
+        primaryLabel: 'Open Place',
+        primaryHref: `place.html?id=${encodeURIComponent(place.id)}`,
+        secondaryLabel: 'Edit Place',
+        secondaryHref: `add_place.html?id=${encodeURIComponent(place.id)}&mode=edit`
+      });
+      card.classList.add('is-visible');
+      placesList.appendChild(card);
+    });
+
+    setupScrollReveal();
+  } catch (error) {
+    if (listingPanel) {
+      listingPanel.classList.add('is-visible', 'listing-panel--empty');
+    }
+    setPlacesStatus('my-places-status', error.message, 'error');
+  }
+}
+
 function getStoredPlaceLocations() {
   try {
     const raw = localStorage.getItem(PLACE_LOCATION_STORAGE_KEY);
@@ -469,42 +563,7 @@ function displayPlaces(places, token = getCookie('token')) {
   }
 
   places.forEach((place, index) => {
-    const placeCard = document.createElement('article');
-    placeCard.className = 'place-card';
-    placeCard.dataset.price = String(Number(place.price) || 0);
-    placeCard.dataset.reveal = 'card';
-
-    const title = place.title || 'New stay';
-    const price = Number(place.price) || 0;
-    const placeId = place.id || '';
-    const area = getPlaceLocationLabel(place);
-    const imageChoice = getPlaceImage(place, index);
-    const initialAverageRating = getAverageRating(Array.isArray(place.reviews) ? place.reviews : []);
-
-    placeCard.innerHTML = `
-      <div class="place-media">
-        <img
-          src="${escapeHtml(imageChoice.preferred)}"
-          alt="${escapeHtml(title)}"
-          loading="lazy"
-          data-fallback="${escapeHtml(imageChoice.fallback)}"
-        >
-      </div>
-      <div class="place-card-body">
-        <div class="place-card-headline">
-          <div class="place-card-title-block">
-            <h2>${escapeHtml(title)}</h2>
-            <p class="place-location">${escapeHtml(area)}</p>
-          </div>
-          <p class="price-tag"><strong>$${price}</strong><span>/ night</span></p>
-        </div>
-        <div class="place-card-rating" data-place-rating>
-          ${renderCardRating(initialAverageRating)}
-        </div>
-        <a href="place.html?id=${encodeURIComponent(placeId)}" class="details-button" aria-label="View details for ${escapeHtml(title)}">View Details</a>
-      </div>
-    `;
-
+    const placeCard = createPlaceCard(place, index);
     const detailsLink = placeCard.querySelector('.details-button');
     const mediaImage = placeCard.querySelector('.place-media img');
 
@@ -529,6 +588,54 @@ function displayPlaces(places, token = getCookie('token')) {
 
   setupScrollReveal();
   enrichPlaceCardsWithRatings(places, token);
+}
+
+function createPlaceCard(place, index = 0, actions = {}) {
+  const placeCard = document.createElement('article');
+  placeCard.className = 'place-card';
+  placeCard.dataset.price = String(Number(place.price) || 0);
+  placeCard.dataset.reveal = 'card';
+
+  const title = place.title || 'New stay';
+  const price = Number(place.price) || 0;
+  const placeId = place.id || '';
+  const area = getPlaceLocationLabel(place);
+  const imageChoice = getPlaceImage(place, index);
+  const initialAverageRating = getAverageRating(Array.isArray(place.reviews) ? place.reviews : []);
+  const primaryLabel = actions.primaryLabel || 'View Details';
+  const primaryHref = actions.primaryHref || `place.html?id=${encodeURIComponent(placeId)}`;
+  const secondaryAction = actions.secondaryLabel && actions.secondaryHref
+    ? `<a href="${escapeHtml(actions.secondaryHref)}" class="details-button details-button--secondary">${escapeHtml(actions.secondaryLabel)}</a>`
+    : '';
+
+  placeCard.innerHTML = `
+    <div class="place-media">
+      <img
+        src="${escapeHtml(imageChoice.preferred)}"
+        alt="${escapeHtml(title)}"
+        loading="lazy"
+        data-fallback="${escapeHtml(imageChoice.fallback)}"
+      >
+    </div>
+    <div class="place-card-body">
+      <div class="place-card-headline">
+        <div class="place-card-title-block">
+          <h2>${escapeHtml(title)}</h2>
+          <p class="place-location">${escapeHtml(area)}</p>
+        </div>
+        <p class="price-tag"><strong>$${price}</strong><span>/ night</span></p>
+      </div>
+      <div class="place-card-rating" data-place-rating>
+        ${renderCardRating(initialAverageRating)}
+      </div>
+      <div class="place-card-actions">
+        <a href="${escapeHtml(primaryHref)}" class="details-button" aria-label="${escapeHtml(primaryLabel)} for ${escapeHtml(title)}">${escapeHtml(primaryLabel)}</a>
+        ${secondaryAction}
+      </div>
+    </div>
+  `;
+
+  return placeCard;
 }
 
 async function enrichPlaceCardsWithRatings(places, token) {
@@ -765,8 +872,15 @@ function setupPlacePage() {
 
   const placeId = getPlaceIdFromURL();
   const token = getAuthToken();
+  const heroActions = document.getElementById('place-hero-actions');
   const addReviewSection = document.getElementById('add-review');
   const addReviewLink = document.getElementById('add-review-link');
+  const editPlaceSection = document.getElementById('edit-place');
+  const editPlaceLink = document.getElementById('edit-place-link');
+
+  if (heroActions) {
+    heroActions.hidden = !token;
+  }
 
   if (addReviewSection) {
     addReviewSection.hidden = !token;
@@ -774,6 +888,14 @@ function setupPlacePage() {
 
   if (addReviewLink && placeId) {
     addReviewLink.href = `add_review.html?id=${encodeURIComponent(placeId)}`;
+  }
+
+  if (editPlaceSection) {
+    editPlaceSection.hidden = true;
+  }
+
+  if (editPlaceLink && placeId) {
+    editPlaceLink.href = `add_place.html?id=${encodeURIComponent(placeId)}&mode=edit`;
   }
 
   if (!placeId) {
@@ -821,10 +943,14 @@ function displayPlaceDetails(place) {
   const placeHeroMeta = document.getElementById('place-hero-meta');
   const heroHeading = document.getElementById('page-hero-detail');
   const heroDescription = document.getElementById('place-hero-description');
+  const heroActions = document.getElementById('place-hero-actions');
+  const editPlaceSection = document.getElementById('edit-place');
+  const editPlaceLink = document.getElementById('edit-place-link');
   const token = getAuthToken();
   const currentUserId = getJwtIdentityFromToken(token);
   const jwtPayload = getJwtPayload(token);
   const canModerateReviews = Boolean(jwtPayload.is_admin);
+  const canEditPlace = Boolean(token) && (canModerateReviews || place.owner?.id === currentUserId);
 
   if (!detailsContainer || !reviewsList) {
     return;
@@ -852,6 +978,15 @@ function displayPlaceDetails(place) {
   const locationLabel = getPlaceLocationLabel(place);
 
   rememberPlace(place);
+  if (heroActions) {
+    heroActions.hidden = !token;
+  }
+  if (editPlaceSection) {
+    editPlaceSection.hidden = !canEditPlace;
+  }
+  if (editPlaceLink && place.id) {
+    editPlaceLink.href = `add_place.html?id=${encodeURIComponent(place.id)}&mode=edit`;
+  }
   if (heroHeading) {
     heroHeading.textContent = title;
   }
@@ -896,7 +1031,7 @@ function displayPlaceDetails(place) {
     const reviewCard = document.createElement('article');
     reviewCard.className = 'review-card';
     const initial = (review.user_id || '?').toString().charAt(0).toUpperCase();
-    const canDeleteReview = Boolean(token) && (canModerateReviews || review.user_id === currentUserId);
+    const canManageReview = Boolean(token) && (canModerateReviews || review.user_id === currentUserId);
     reviewCard.innerHTML = `
       <div class="review-card-header">
         <div class="review-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
@@ -904,7 +1039,12 @@ function displayPlaceDetails(place) {
           <h3>Guest ${escapeHtml(review.user_id || 'Unknown')}</h3>
           ${starsHtml(review.rating)}
         </div>
-        ${canDeleteReview ? `<button type="button" class="review-delete-button" data-review-id="${escapeHtml(review.id || '')}">Delete</button>` : ''}
+        ${canManageReview ? `
+          <div class="review-card-actions">
+            <a href="add_review.html?id=${encodeURIComponent(place.id)}&review=${encodeURIComponent(review.id || '')}&mode=edit" class="review-edit-button">Edit</a>
+            <button type="button" class="review-delete-button" data-review-id="${escapeHtml(review.id || '')}">Delete</button>
+          </div>
+        ` : ''}
       </div>
       <p>${escapeHtml(review.text || '')}</p>
     `;
@@ -997,6 +1137,14 @@ function setupAddReviewPage() {
 
   const placeId = getPlaceIdFromURL();
   const messageElement = document.getElementById('review-message');
+  const params = new URLSearchParams(window.location.search);
+  const reviewId = params.get('review');
+  const editMode = params.get('mode') === 'edit' && Boolean(reviewId);
+  const pageTitle = document.getElementById('page-hero-review');
+  const pageCopy = document.querySelector('.page-hero-copy');
+  const formHeading = document.getElementById('review-heading');
+  const formCopy = document.querySelector('#review-form .form-copy');
+  const submitButton = document.getElementById('review-submit-button');
 
   if (!placeId) {
     const rememberedPlaceId = getRememberedPlaceId();
@@ -1010,7 +1158,15 @@ function setupAddReviewPage() {
     return;
   }
 
-  loadReviewedPlaceName(token, placeId);
+  if (editMode) {
+    if (pageTitle) pageTitle.textContent = 'Refine your review.';
+    if (pageCopy) pageCopy.textContent = 'Adjust the wording or rating, then save the updated version.';
+    if (formHeading) formHeading.textContent = 'Edit Review';
+    if (formCopy) formCopy.innerHTML = 'You are updating your review for <strong id="reviewed-place-name">this place</strong>.';
+    if (submitButton) submitButton.textContent = 'Save Review';
+  }
+
+  initializeReviewContext(reviewForm, messageElement, token, placeId, reviewId, editMode);
 
   reviewForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -1020,6 +1176,16 @@ function setupAddReviewPage() {
     const submitButton = reviewForm.querySelector('button[type="submit"]');
 
     if (!reviewInput || !submitButton || !messageElement) {
+      return;
+    }
+
+    if (reviewForm.dataset.reviewLocked === 'own-place') {
+      setMessage(messageElement, 'You cannot review your own place.', 'error');
+      return;
+    }
+
+    if (!editMode && reviewForm.dataset.reviewLocked === 'already-reviewed') {
+      setMessage(messageElement, 'You have already reviewed this place.', 'error');
       return;
     }
 
@@ -1041,14 +1207,19 @@ function setupAddReviewPage() {
       return;
     }
 
-    setMessage(messageElement, 'Submitting review…', 'success');
+    setMessage(messageElement, editMode ? 'Saving review…' : 'Submitting review…', 'success');
     submitButton.disabled = true;
     reviewForm.setAttribute('aria-busy', 'true');
 
     try {
-      await submitReview(token, placeId, reviewInput.value.trim(), ratingInput.value);
-      setMessage(messageElement, 'Review submitted successfully.', 'success');
-      reviewForm.reset();
+      if (editMode) {
+        await updateReview(token, reviewId, placeId, reviewInput.value.trim(), ratingInput.value);
+        setMessage(messageElement, 'Review updated successfully.', 'success');
+      } else {
+        await submitReview(token, placeId, reviewInput.value.trim(), ratingInput.value);
+        setMessage(messageElement, 'Review submitted successfully.', 'success');
+        reviewForm.reset();
+      }
     } catch (error) {
       setMessage(messageElement, error.message, 'error');
     } finally {
@@ -1058,9 +1229,14 @@ function setupAddReviewPage() {
   });
 }
 
-async function loadReviewedPlaceName(token, placeId) {
+async function initializeReviewContext(reviewForm, messageElement, token, placeId, reviewId = '', editMode = false) {
   const placeNameElement = document.getElementById('reviewed-place-name');
+  const reviewInput = document.getElementById('review');
+  const ratingInputs = reviewForm ? Array.from(reviewForm.querySelectorAll('input[name="rating"]')) : [];
+  const submitButton = reviewForm ? reviewForm.querySelector('button[type="submit"]') : null;
   const headers = {};
+  const currentUserId = getJwtIdentityFromToken(token);
+  const jwtPayload = getJwtPayload(token);
 
   if (token) {
     headers.Authorization = `Bearer ${token}`;
@@ -1076,6 +1252,66 @@ async function loadReviewedPlaceName(token, placeId) {
 
     if (placeNameElement) {
       placeNameElement.textContent = place.title || 'this place';
+    }
+
+    if (!reviewForm || !messageElement) {
+      return;
+    }
+
+    reviewForm.dataset.reviewLocked = '';
+
+    if (!editMode && place.owner?.id === currentUserId) {
+      reviewForm.dataset.reviewLocked = 'own-place';
+      setMessage(messageElement, 'You cannot review your own place.', 'error');
+    } else if (!editMode && Array.isArray(place.reviews) && place.reviews.some((review) => review.user_id === currentUserId)) {
+      reviewForm.dataset.reviewLocked = 'already-reviewed';
+      setMessage(messageElement, 'You have already reviewed this place.', 'error');
+    }
+
+    const isLocked = Boolean(reviewForm.dataset.reviewLocked);
+    if (reviewInput) {
+      reviewInput.disabled = isLocked;
+    }
+    ratingInputs.forEach((input) => {
+      input.disabled = isLocked;
+    });
+    if (submitButton) {
+      submitButton.disabled = isLocked;
+    }
+
+    if (editMode && reviewId) {
+      const reviewResponse = await fetch(`${API_BASE_URL}/reviews/${encodeURIComponent(reviewId)}`, { headers });
+      const review = await reviewResponse.json().catch(() => ({}));
+
+      if (!reviewResponse.ok) {
+        throw new Error(review.error || 'Unable to load review.');
+      }
+
+      const canEditReview = Boolean(jwtPayload.is_admin) || review.user_id === currentUserId;
+      if (!canEditReview) {
+        redirectToIndexWithNotice('You can only edit your own reviews.');
+        return;
+      }
+
+      if (review.place_id !== placeId) {
+        throw new Error('This review does not belong to the current place.');
+      }
+
+      if (reviewInput) {
+        reviewInput.disabled = false;
+        reviewInput.value = review.text || '';
+      }
+
+      ratingInputs.forEach((input) => {
+        input.disabled = false;
+        input.checked = String(review.rating) === input.value;
+      });
+
+      if (submitButton) {
+        submitButton.disabled = false;
+      }
+
+      reviewForm.dataset.reviewLocked = '';
     }
   } catch {
     if (placeNameElement) {
@@ -1101,7 +1337,37 @@ async function submitReview(token, placeId, reviewText, rating) {
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Your session is no longer valid. Please log in again.');
+    }
     throw new Error(data.error || 'Failed to submit review.');
+  }
+
+  return data;
+}
+
+async function updateReview(token, reviewId, placeId, reviewText, rating) {
+  const response = await fetch(`${API_BASE_URL}/reviews/${encodeURIComponent(reviewId)}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      text: reviewText,
+      rating: Number(rating),
+      place_id: placeId,
+      user_id: getJwtIdentityFromToken(token)
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error('Your session is no longer valid. Please log in again.');
+    }
+    throw new Error(data.error || 'Failed to update review.');
   }
 
   return data;
@@ -1136,13 +1402,31 @@ function setupAddPlacePage() {
   }
 
   const token = getAuthToken();
+  const params = new URLSearchParams(window.location.search);
+  const placeId = params.get('id');
+  const editMode = params.get('mode') === 'edit' && Boolean(placeId);
+  const pageKicker = document.getElementById('place-page-kicker');
+  const pageTitle = document.getElementById('page-hero-place');
+  const pageCopy = document.getElementById('place-page-copy');
+  const formHeading = document.getElementById('place-form-heading');
+  const formCopy = document.getElementById('place-form-copy');
+  const submitButton = document.getElementById('place-submit-button');
 
   if (!token) {
     redirectToIndexWithNotice('Please log in before publishing a place.');
     return;
   }
 
-  loadAmenities(token);
+  if (editMode) {
+    if (pageKicker) pageKicker.textContent = 'Refine the details';
+    if (pageTitle) pageTitle.textContent = 'Edit your place.';
+    if (pageCopy) pageCopy.textContent = 'Adjust the details, amenities, or location and save when everything feels right.';
+    if (formHeading) formHeading.textContent = 'Edit Place';
+    if (formCopy) formCopy.textContent = 'Update the essentials and save the latest version.';
+    if (submitButton) submitButton.textContent = 'Save Changes';
+  }
+
+  loadAmenities(token, editMode ? placeId : '');
 
   placeForm.addEventListener('submit', async (event) => {
     event.preventDefault();
@@ -1154,8 +1438,6 @@ function setupAddPlacePage() {
     const latitudeInput = document.getElementById('place-latitude');
     const longitudeInput = document.getElementById('place-longitude');
     const messageElement = document.getElementById('place-message');
-    const submitButton = placeForm.querySelector('button[type="submit"]');
-
     if (!titleInput || !descriptionInput || !priceInput || !locationInput || !latitudeInput || !longitudeInput || !messageElement || !submitButton) {
       return;
     }
@@ -1200,12 +1482,12 @@ function setupAddPlacePage() {
     const selectedAmenities = Array.from(placeForm.querySelectorAll('input[name="amenities"]:checked'))
       .map((input) => input.value);
 
-    setMessage(messageElement, 'Publishing place…', 'success');
+    setMessage(messageElement, editMode ? 'Saving changes…' : 'Publishing place…', 'success');
     submitButton.disabled = true;
     placeForm.setAttribute('aria-busy', 'true');
 
     try {
-      const createdPlace = await submitPlace(token, {
+      const payload = {
         title: titleInput.value.trim(),
         description: descriptionInput.value.trim(),
         price: Number(priceInput.value),
@@ -1213,11 +1495,15 @@ function setupAddPlacePage() {
         longitude: Number(longitudeInput.value),
         owner_id: getJwtIdentityFromToken(token) || 'current-user',
         amenities: selectedAmenities
-      });
+      };
 
-      setStoredPlaceLocation(createdPlace.id, locationInput.value.trim());
-      setSiteNotice('Place published successfully.');
-      window.location.href = `place.html?id=${encodeURIComponent(createdPlace.id)}`;
+      const savedPlace = editMode
+        ? await updatePlace(token, placeId, payload)
+        : await submitPlace(token, payload);
+
+      setStoredPlaceLocation(savedPlace.id, locationInput.value.trim());
+      setSiteNotice(editMode ? 'Place updated successfully.' : 'Place published successfully.');
+      window.location.href = `place.html?id=${encodeURIComponent(savedPlace.id)}`;
     } catch (error) {
       setMessage(messageElement, error.message, 'error');
     } finally {
@@ -1227,7 +1513,7 @@ function setupAddPlacePage() {
   });
 }
 
-async function loadAmenities(token) {
+async function loadAmenities(token, selectedPlaceId = '') {
   const amenitiesContainer = document.getElementById('amenities-options');
   const amenitiesStatus = document.getElementById('amenities-status');
   const headers = {};
@@ -1268,10 +1554,63 @@ async function loadAmenities(token) {
     if (amenitiesStatus) {
       amenitiesStatus.remove();
     }
+
+    if (selectedPlaceId) {
+      await prefillPlaceFormForEdit(token, selectedPlaceId);
+    }
   } catch (error) {
     if (amenitiesStatus) {
       amenitiesStatus.textContent = error.message;
       amenitiesStatus.classList.add('places-status--error');
+    }
+  }
+}
+
+async function prefillPlaceFormForEdit(token, placeId) {
+  const titleInput = document.getElementById('place-title');
+  const descriptionInput = document.getElementById('place-description');
+  const priceInput = document.getElementById('place-price');
+  const locationInput = document.getElementById('place-location-name');
+  const latitudeInput = document.getElementById('place-latitude');
+  const longitudeInput = document.getElementById('place-longitude');
+  const messageElement = document.getElementById('place-message');
+  const currentUserId = getJwtIdentityFromToken(token);
+  const jwtPayload = getJwtPayload(token);
+  const headers = { Authorization: `Bearer ${token}` };
+
+  if (!titleInput || !descriptionInput || !priceInput || !locationInput || !latitudeInput || !longitudeInput) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/places/${encodeURIComponent(placeId)}`, { headers });
+    const place = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      throw new Error(place.error || 'Unable to load place.');
+    }
+
+    const canEditPlace = Boolean(jwtPayload.is_admin) || place.owner?.id === currentUserId;
+
+    if (!canEditPlace) {
+      redirectToIndexWithNotice('You can only edit your own places.');
+      return;
+    }
+
+    titleInput.value = place.title || '';
+    descriptionInput.value = place.description || '';
+    priceInput.value = Number(place.price) || '';
+    latitudeInput.value = Number(place.latitude) || '';
+    longitudeInput.value = Number(place.longitude) || '';
+    locationInput.value = getPlaceLocationLabel(place) || '';
+
+    const amenityIds = new Set((Array.isArray(place.amenities) ? place.amenities : []).map((amenity) => amenity.id));
+    document.querySelectorAll('input[name="amenities"]').forEach((input) => {
+      input.checked = amenityIds.has(input.value);
+    });
+  } catch (error) {
+    if (messageElement) {
+      setMessage(messageElement, error.message, 'error');
     }
   }
 }
@@ -1298,6 +1637,33 @@ async function submitPlace(token, payload) {
       data.errors ? Object.values(data.errors).join(' ') : ''
     );
     throw new Error(detailedMessage || 'Failed to publish place.');
+  }
+
+  return data;
+}
+
+async function updatePlace(token, placeId, payload) {
+  const response = await fetch(`${API_BASE_URL}/places/${encodeURIComponent(placeId)}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      document.cookie = 'token=; max-age=0; path=/; SameSite=Lax';
+      throw new Error('Your session is no longer valid. Please log in again.');
+    }
+
+    const detailedMessage = data.error || data.message || (
+      data.errors ? Object.values(data.errors).join(' ') : ''
+    );
+    throw new Error(detailedMessage || 'Failed to update place.');
   }
 
   return data;
