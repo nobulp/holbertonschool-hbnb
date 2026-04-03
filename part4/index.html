@@ -26,22 +26,21 @@
         </nav>
     </header>
 
-    <main id="main-content" class="home-layout home-layout--minimal">
+    <main id="main-content" class="home-layout home-layout--minimal" tabindex="-1">
         <section class="main-stage">
-            <section class="hero hero--landscape hero--minimal" aria-labelledby="hero-heading">
+            <section class="hero hero--landscape hero--minimal" aria-labelledby="hero-heading" data-reveal="hero">
                 <div class="hero-nav-line">
                     <span class="hero-brand">hbnb</span>
                     <span class="hero-line"></span>
-                    <span class="hero-caption">A quieter way to browse stays</span>
+                    <span class="hero-caption">Make memories</span>
                 </div>
                 <div class="hero-content hero-content--minimal">
-                    <p class="eyebrow">Curated stays</p>
-                    <h1 id="hero-heading">Stay somewhere calm, considered, and memorable.</h1>
-                    <p class="hero-copy">Browse places with less noise and a little more atmosphere. The essentials stay visible, the rest gets out of the way.</p>
+                    <h1 id="hero-heading">Find a place that fits your trip.</h1>
+                    <p class="hero-copy">Choose a place that feels right, settle in, and make the stay part of the memory.</p>
                     <div class="hero-minimal-meta" aria-label="HBnB highlights">
-                        <span>Handpicked mood</span>
-                        <span>Instant price filter</span>
-                        <span>Live API data</span>
+                        <span>Compare stays in seconds</span>
+                        <span>Filter by your budget</span>
+                        <span>Book the option that suits you best</span>
                     </div>
                 </div>
                 <div class="hero-scene" aria-hidden="true">
@@ -50,10 +49,9 @@
                 </div>
             </section>
 
-            <section class="listing-panel listing-panel--minimal" aria-labelledby="listing-title">
+            <section class="listing-panel listing-panel--minimal" aria-labelledby="listing-title" data-reveal="panel">
                 <div class="listing-panel__header listing-panel__header--minimal">
                     <div>
-                        <p class="eyebrow eyebrow--dark">Explore nearby</p>
                         <h2 id="listing-title">Places available now.</h2>
                     </div>
                     <p class="listing-panel__copy">Filter by price, open the details you want, and keep the experience focused.</p>
@@ -70,7 +68,7 @@
                 </section>
 
                 <section id="places-list" class="places-grid" aria-label="Available places" aria-live="polite">
-                    <p id="places-status" class="places-status">Loading places...</p>
+                    <p id="places-status" class="places-status" role="status" aria-live="polite" aria-atomic="true">Loading places...</p>
                 </section>
             </section>
         </section>

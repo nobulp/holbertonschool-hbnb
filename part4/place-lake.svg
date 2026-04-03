@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" role="img" aria-label="Lakeside cabin">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#92adbc"/>
+      <stop offset="55%" stop-color="#4e6773"/>
+      <stop offset="100%" stop-color="#11191e"/>
+    </linearGradient>
+    <radialGradient id="sun1" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f2d8ab" stop-opacity=".95"/>
+      <stop offset="100%" stop-color="#f2d8ab" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="900" height="640" fill="url(#g1)"/>
+  <circle cx="628" cy="136" r="88" fill="url(#sun1)"/>
+  <path d="M0 276 140 174l118 56 164-138 154 118 146-116 178 182V0H0z" fill="#2a3740"/>
+  <path d="M0 330c98-20 162-52 244-52 104 0 150 66 232 66 94 0 128-74 244-74 108 0 144 76 180 76v294H0z" fill="#41463e"/>
+  <rect y="352" width="900" height="288" fill="#091014"/>
+  <path d="M0 442c70 14 126 26 192 26 130 0 188-44 308-44 110 0 176 42 276 42 44 0 84-6 124-12v12c-44 6-82 12-124 12-102 0-166-42-278-42-118 0-176 44-306 44-68 0-124-12-192-26z" fill="#89979c" opacity=".16"/>
+  <rect x="166" y="276" width="172" height="112" rx="10" fill="#4a3426"/>
+  <path d="M148 286 252 208l106 78z" fill="#2c211c"/>
+  <rect x="226" y="308" width="42" height="80" fill="#d7bf84"/>
+</svg>

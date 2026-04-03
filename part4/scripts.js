@@ -3,10 +3,12 @@ let allPlaces = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
+  setupHeaderShrink();
   renderSiteNotice();
   setFooterYear();
   setupNav();
   setupCookieBanner();
+  setupScrollReveal();
   setupLoginForm();
   setupIndexPage();
   setupPlacePage();
@@ -32,6 +34,7 @@ function setupNav() {
 
   if (logoutButton) {
     logoutButton.hidden = !token;
+    logoutButton.setAttribute('aria-hidden', String(!token));
     logoutButton.addEventListener('click', logout);
   }
 }
@@ -40,6 +43,21 @@ function logout() {
   // Expire the token cookie immediately
   document.cookie = 'token=; max-age=0; path=/; SameSite=Lax';
   window.location.href = 'index.html';
+}
+
+function setupHeaderShrink() {
+  const pageHeader = document.querySelector('header');
+
+  if (!pageHeader) {
+    return;
+  }
+
+  const updateHeaderState = () => {
+    document.body.classList.toggle('header-condensed', window.scrollY > 18);
+  };
+
+  updateHeaderState();
+  window.addEventListener('scroll', updateHeaderState, { passive: true });
 }
 
 function initializeTheme() {
@@ -199,8 +217,25 @@ function setupLoginForm() {
       return;
     }
 
+    clearFieldValidity(emailInput, passwordInput);
+
+    if (!emailInput.value.trim()) {
+      setFieldValidity(emailInput, true);
+      setMessage(messageElement, 'Enter your email address to continue.', 'error');
+      emailInput.focus();
+      return;
+    }
+
+    if (!passwordInput.value) {
+      setFieldValidity(passwordInput, true);
+      setMessage(messageElement, 'Enter your password to continue.', 'error');
+      passwordInput.focus();
+      return;
+    }
+
     setMessage(messageElement, 'Signing in…', 'success');
     submitButton.disabled = true;
+    loginForm.setAttribute('aria-busy', 'true');
 
     try {
       const accessToken = await loginUser(emailInput.value.trim(), passwordInput.value);
@@ -208,8 +243,13 @@ function setupLoginForm() {
       setMessage(messageElement, 'Login successful. Redirecting…', 'success');
       window.location.href = 'index.html';
     } catch (error) {
+      setFieldValidity(emailInput, true);
+      setFieldValidity(passwordInput, true);
       setMessage(messageElement, error.message, 'error');
       submitButton.disabled = false;
+      passwordInput.focus();
+    } finally {
+      loginForm.removeAttribute('aria-busy');
     }
   });
 }
@@ -276,6 +316,23 @@ function setMessage(element, message, type) {
   if (type) {
     element.classList.add(type);
   }
+
+  const isError = type === 'error';
+  element.setAttribute('role', isError ? 'alert' : 'status');
+  element.setAttribute('aria-live', isError ? 'assertive' : 'polite');
+  element.setAttribute('aria-atomic', 'true');
+}
+
+function setFieldValidity(field, isInvalid) {
+  if (!field) {
+    return;
+  }
+
+  field.setAttribute('aria-invalid', String(Boolean(isInvalid)));
+}
+
+function clearFieldValidity(...fields) {
+  fields.forEach((field) => setFieldValidity(field, false));
 }
 
 /* =====================================================================
@@ -299,7 +356,6 @@ function setupIndexPage() {
 }
 
 async function fetchPlaces(token) {
-  const statusElement = document.getElementById('places-status');
   const headers = {};
 
   if (token) {
@@ -318,9 +374,7 @@ async function fetchPlaces(token) {
     displayPlaces(allPlaces);
     applyCurrentFilter();
   } catch (error) {
-    if (statusElement) {
-      statusElement.textContent = error.message;
-    }
+    setPlacesStatus('places-status', error.message, 'error');
   }
 }
 
@@ -345,6 +399,7 @@ function displayPlaces(places) {
     const placeCard = document.createElement('article');
     placeCard.className = 'place-card';
     placeCard.dataset.price = String(Number(place.price) || 0);
+    placeCard.dataset.reveal = 'card';
 
     const title = place.title || 'Untitled place';
     const price = Number(place.price) || 0;
@@ -352,14 +407,18 @@ function displayPlaces(places) {
     const area = getPlaceAreaLabel(place.latitude, place.longitude);
     const rateLabel = getRateLabel(price);
     const summary = getPlaceSummary(price, area);
+    const imageSrc = getPlaceImage(place);
 
     placeCard.innerHTML = `
+      <div class="place-media">
+        <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(title)}" loading="lazy">
+      </div>
       <p class="place-kicker">${escapeHtml(rateLabel)}</p>
       <h2>${escapeHtml(title)}</h2>
       <p class="place-location">${escapeHtml(area)}</p>
       <p class="price-tag"><strong>$${price}</strong> / night</p>
       <p class="place-summary">${escapeHtml(summary)}</p>
-      <a href="place.html?id=${encodeURIComponent(placeId)}" class="details-button">View Details</a>
+      <a href="place.html?id=${encodeURIComponent(placeId)}" class="details-button" aria-label="View details for ${escapeHtml(title)}">View Details</a>
     `;
 
     const detailsLink = placeCard.querySelector('.details-button');
@@ -371,6 +430,20 @@ function displayPlaces(places) {
 
     placesList.appendChild(placeCard);
   });
+
+  setupScrollReveal();
+}
+
+function getPlaceImage(place) {
+  const gallery = ['place-lake.svg', 'place-forest.svg', 'place-city.svg'];
+  const seed = `${place.id || ''}${place.title || ''}${place.price || ''}`;
+  let hash = 0;
+
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  }
+
+  return gallery[hash % gallery.length];
 }
 
 function getPlaceAreaLabel(latitude, longitude) {
@@ -429,6 +502,29 @@ function applyCurrentFilter() {
   }
 
   filterPlacesByPrice(priceFilter.value);
+}
+
+function setupScrollReveal() {
+  const items = document.querySelectorAll('[data-reveal]');
+
+  if (!items.length || !('IntersectionObserver' in window)) {
+    items.forEach((item) => item.classList.add('is-visible'));
+    return;
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('is-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    rootMargin: '0px 0px -12% 0px',
+    threshold: 0.12
+  });
+
+  items.forEach((item) => observer.observe(item));
 }
 
 /**
@@ -530,8 +626,8 @@ async function fetchPlaceDetails(token, placeId) {
 
     displayPlaceDetails(place);
   } catch (error) {
-    setPlacesStatus('place-status', error.message);
-    setPlacesStatus('reviews-status', 'Unable to load reviews.');
+    setPlacesStatus('place-status', error.message, 'error');
+    setPlacesStatus('reviews-status', 'Unable to load reviews.', 'error');
   }
 }
 
@@ -637,11 +733,16 @@ function buildAmenitiesList(amenities) {
     .join('');
 }
 
-function setPlacesStatus(id, message) {
+function setPlacesStatus(id, message, type = 'status') {
   const element = document.getElementById(id);
 
   if (element) {
     element.textContent = message;
+    const isError = type === 'error';
+    element.setAttribute('role', isError ? 'alert' : 'status');
+    element.setAttribute('aria-live', isError ? 'assertive' : 'polite');
+    element.setAttribute('aria-atomic', 'true');
+    element.classList.toggle('places-status--error', isError);
   }
 }
 
@@ -691,13 +792,27 @@ function setupAddReviewPage() {
       return;
     }
 
+    setFieldValidity(reviewInput, false);
+
+    if (!reviewInput.value.trim()) {
+      setFieldValidity(reviewInput, true);
+      setMessage(messageElement, 'Write a few words before sending your review.', 'error');
+      reviewInput.focus();
+      return;
+    }
+
     if (!ratingInput) {
       setMessage(messageElement, 'Please select a star rating.', 'error');
+      const firstRating = reviewForm.querySelector('input[name="rating"]');
+      if (firstRating) {
+        firstRating.focus();
+      }
       return;
     }
 
     setMessage(messageElement, 'Submitting review…', 'success');
     submitButton.disabled = true;
+    reviewForm.setAttribute('aria-busy', 'true');
 
     try {
       await submitReview(token, placeId, reviewInput.value.trim(), ratingInput.value);
@@ -707,6 +822,7 @@ function setupAddReviewPage() {
       setMessage(messageElement, error.message, 'error');
     } finally {
       submitButton.disabled = false;
+      reviewForm.removeAttribute('aria-busy');
     }
   });
 }

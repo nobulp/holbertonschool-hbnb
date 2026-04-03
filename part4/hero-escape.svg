@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 980" role="img" aria-label="Mountain lake at dusk">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#73899b"/>
+      <stop offset="45%" stop-color="#445966"/>
+      <stop offset="100%" stop-color="#0d1419"/>
+    </linearGradient>
+    <linearGradient id="lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#11191f" stop-opacity=".15"/>
+      <stop offset="100%" stop-color="#06090c"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f3d7a2" stop-opacity=".95"/>
+      <stop offset="55%" stop-color="#f3d7a2" stop-opacity=".18"/>
+      <stop offset="100%" stop-color="#f3d7a2" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d9cfac"/>
+      <stop offset="100%" stop-color="#9b8968"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="980" fill="url(#sky)"/>
+  <circle cx="1180" cy="255" r="130" fill="url(#sun)"/>
+  <path d="M0 412 180 286l170 54 208-176 192 148 202-202 208 156 178-214 262 226V0H0z" fill="#24323d"/>
+  <path d="M0 490 204 386l150 88 190-158 186 116 210-170 214 126 180-102 266 154V980H0z" fill="#34424c"/>
+  <path d="M0 606c90-18 164-58 248-58 114 0 196 90 296 90 104 0 162-104 292-104 136 0 194 110 286 110 98 0 138-60 228-60 88 0 150 38 250 84v322H0z" fill="#3a4037"/>
+  <path d="M0 684c120-26 218-20 330 20 86 30 174 84 266 84 106 0 198-70 296-70 88 0 170 62 256 62 116 0 188-56 276-56 70 0 122 26 176 54v202H0z" fill="#171d1f" opacity=".62"/>
+  <rect y="650" width="1600" height="330" fill="url(#lake)"/>
+  <path d="M0 758c74 16 130 28 206 28 150 0 232-56 362-56 128 0 194 48 334 48 124 0 204-34 330-34 148 0 232 46 368 46v20c-136 0-208-44-362-44-130 0-204 34-332 34-144 0-212-48-334-48-128 0-212 56-364 56-78 0-140-12-208-28z" fill="#7b8a90" opacity=".18"/>
+  <path d="M0 808c84 18 150 28 234 28 148 0 240-52 352-52 144 0 206 52 336 52 116 0 216-34 338-34 134 0 222 44 340 44v14c-120 0-204-44-342-44-118 0-218 34-336 34-136 0-196-52-336-52-110 0-202 52-352 52-84 0-150-10-234-28z" fill="#9aa4a6" opacity=".12"/>
+  <ellipse cx="802" cy="796" rx="220" ry="26" fill="#101518" opacity=".44"/>
+  <path d="M690 780 742 674l58-36 54 38 54 104z" fill="url(#tent)"/>
+  <circle cx="800" cy="726" r="26" fill="#f6d58d" opacity=".88"/>
+</svg>

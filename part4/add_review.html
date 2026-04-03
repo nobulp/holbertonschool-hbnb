@@ -26,12 +26,12 @@
         </nav>
     </header>
 
-    <main id="main-content" class="page-shell">
+    <main id="main-content" class="page-shell" tabindex="-1">
         <section class="page-hero page-hero--compact" aria-labelledby="page-hero-review">
             <p class="eyebrow">Your impression</p>
             <h1 id="page-hero-review">Share how the stay felt.</h1>
             <p class="page-hero-copy">A few honest lines are enough. The goal is simply to help the next guest understand the place a little better.</p>
-            <div id="review-hero-meta" class="review-hero-meta" aria-live="polite">
+            <div id="review-hero-meta" class="review-hero-meta" aria-live="polite" aria-atomic="true">
                 <span class="review-hero-chip">Reviewing this place</span>
                 <span class="review-hero-chip">1 to 5 stars</span>
                 <span class="review-hero-chip">Signed-in guests only</span>
@@ -45,7 +45,7 @@
                 <p class="form-copy">
                     You are writing about <strong id="reviewed-place-name">this place</strong>.
                 </p>
-                <p id="review-message" class="form-message" aria-live="polite" role="status"></p>
+                <p id="review-message" class="form-message" aria-live="polite" aria-atomic="true" role="status"></p>
 
                 <div class="review-form-grid">
                     <section class="review-form-panel review-form-panel--writing" aria-labelledby="writing-panel-title">
@@ -60,9 +60,10 @@
                             rows="6"
                             required
                             aria-required="true"
-                            aria-describedby="review-message"
+                            aria-describedby="review-message review-help"
                             placeholder="Share your experience…"
                         ></textarea>
+                        <p id="review-help" class="visually-hidden">Write a few lines about the stay, then choose a rating from 1 to 5 stars.</p>
                     </section>
 
                     <section class="review-form-panel review-form-panel--rating" aria-labelledby="rating-panel-title">
@@ -70,7 +71,7 @@
                             <p class="review-form-panel__kicker">Your rating</p>
                             <h3 id="rating-panel-title">How would you rate it?</h3>
                         </div>
-                        <fieldset class="star-rating-group">
+                        <fieldset class="star-rating-group" aria-describedby="rating-help review-message">
                             <legend>Rating</legend>
                             <div class="star-rating" role="group" aria-label="Select a rating from 1 to 5">
                                 <input type="radio" id="star5" name="rating" value="5" required aria-required="true">
@@ -84,7 +85,7 @@
                                 <input type="radio" id="star1" name="rating" value="1">
                                 <label for="star1" title="1 – Poor" aria-label="1 star – Poor">★</label>
                             </div>
-                            <span class="star-hint">Choose the score that feels right.</span>
+                            <span id="rating-help" class="star-hint">Choose the score that feels right.</span>
                         </fieldset>
                     </section>
                 </div>
