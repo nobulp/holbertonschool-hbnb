@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Write and submit a review for a place on HBnB.">
-    <title>HBnB – Add Review</title>
+    <meta name="description" content="Publish a new place on HBnB.">
+    <title>HBnB – Add Place</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -17,7 +17,7 @@
         </a>
         <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
-            <a href="add_place.html" id="add-place-link" hidden>Add Place</a>
+            <a href="add_place.html" id="add-place-link" aria-current="page" hidden>Add Place</a>
             <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
                 <span class="theme-toggle-icon" aria-hidden="true">☾</span>
             </button>
@@ -27,65 +27,67 @@
     </header>
 
     <main id="main-content" class="page-shell" tabindex="-1">
-        <section class="page-hero page-hero--compact" aria-labelledby="page-hero-review">
-            <p class="eyebrow">Your impression</p>
-            <h1 id="page-hero-review">Share how the stay felt.</h1>
-            <p class="page-hero-copy">A short, honest review is enough to help the next guest.</p>
+        <section class="page-hero page-hero--compact" aria-labelledby="page-hero-place">
+            <p class="eyebrow">Host a stay</p>
+            <h1 id="page-hero-place">Share a place worth staying in.</h1>
+            <p class="page-hero-copy">Add the essentials, choose the amenities, and publish the place in a few steps.</p>
         </section>
 
-        <section class="review-section" aria-labelledby="review-heading">
-            <form id="review-form" method="post" novalidate>
-                <p class="form-kicker">Leave a note</p>
-                <h2 id="review-heading">Add a Review</h2>
-                <p class="form-copy">
-                    You are writing about <strong id="reviewed-place-name">this place</strong>.
-                </p>
-                <p id="review-message" class="form-message" aria-live="polite" aria-atomic="true" role="status"></p>
+        <section class="review-section" aria-labelledby="place-form-heading">
+            <form id="place-form" method="post" novalidate>
+                <p class="form-kicker">New listing</p>
+                <h2 id="place-form-heading">Add a Place</h2>
+                <p class="form-copy">Fill in the essentials and publish when it looks right.</p>
+                <p id="place-message" class="form-message" aria-live="polite" aria-atomic="true" role="status"></p>
 
-                <div class="review-form-grid">
-                    <section class="review-form-panel review-form-panel--writing" aria-labelledby="writing-panel-title">
+                <div class="place-form-grid">
+                    <section class="review-form-panel" aria-labelledby="place-panel-main">
                         <div class="review-form-panel__header">
-                            <p class="review-form-panel__kicker">A few words</p>
-                            <h3 id="writing-panel-title">What stayed with you?</h3>
+                            <p class="review-form-panel__kicker">Main details</p>
+                            <h3 id="place-panel-main">The essentials</h3>
                         </div>
-                        <label for="review">Your review</label>
-                        <textarea
-                            id="review"
-                            name="review"
-                            rows="6"
-                            required
-                            aria-required="true"
-                            aria-describedby="review-message review-help"
-                            placeholder="Share your experience…"
-                        ></textarea>
-                        <p id="review-help" class="visually-hidden">Write a few lines about the stay, then choose a rating from 1 to 5 stars.</p>
+
+                        <label for="place-title">Title</label>
+                        <input id="place-title" name="title" type="text" maxlength="100" required aria-required="true" placeholder="e.g. Light-filled apartment near Canal Saint-Martin">
+
+                        <label for="place-description">Description</label>
+                        <textarea id="place-description" name="description" rows="5" placeholder="Quiet one-bedroom stay with fast Wi-Fi, a small balcony, and an easy walk to cafés and transport."></textarea>
+
+                        <div class="place-form-row">
+                            <div>
+                                <label for="place-price">Price per night</label>
+                                <input id="place-price" name="price" type="text" inputmode="decimal" required aria-required="true" placeholder="145">
+                            </div>
+                            <div>
+                                <label for="place-location-name">Location</label>
+                                <input id="place-location-name" name="location_name" type="text" required aria-required="true" placeholder="Paris, France">
+                            </div>
+                        </div>
+
+                        <div class="place-form-row">
+                            <div>
+                                <label for="place-latitude">Latitude</label>
+                                <input id="place-latitude" name="latitude" type="text" inputmode="decimal" required aria-required="true" placeholder="48.86">
+                            </div>
+                            <div>
+                                <label for="place-longitude">Longitude</label>
+                                <input id="place-longitude" name="longitude" type="text" inputmode="decimal" required aria-required="true" placeholder="2.35">
+                            </div>
+                        </div>
                     </section>
 
-                    <section class="review-form-panel review-form-panel--rating" aria-labelledby="rating-panel-title">
+                    <section class="review-form-panel review-form-panel--amenities" aria-labelledby="place-panel-amenities">
                         <div class="review-form-panel__header">
-                            <p class="review-form-panel__kicker">Your rating</p>
-                            <h3 id="rating-panel-title">How would you rate it?</h3>
+                            <p class="review-form-panel__kicker">Comforts</p>
+                            <h3 id="place-panel-amenities">Amenities</h3>
                         </div>
-                        <fieldset class="star-rating-group" aria-describedby="rating-help review-message">
-                            <legend>Rating</legend>
-                            <div class="star-rating" role="group" aria-label="Select a rating from 1 to 5">
-                                <input type="radio" id="star5" name="rating" value="5" required aria-required="true">
-                                <label for="star5" title="5 – Excellent" aria-label="5 stars – Excellent">★</label>
-                                <input type="radio" id="star4" name="rating" value="4">
-                                <label for="star4" title="4 – Very good" aria-label="4 stars – Very good">★</label>
-                                <input type="radio" id="star3" name="rating" value="3">
-                                <label for="star3" title="3 – Good" aria-label="3 stars – Good">★</label>
-                                <input type="radio" id="star2" name="rating" value="2">
-                                <label for="star2" title="2 – Fair" aria-label="2 stars – Fair">★</label>
-                                <input type="radio" id="star1" name="rating" value="1">
-                                <label for="star1" title="1 – Poor" aria-label="1 star – Poor">★</label>
-                            </div>
-                            <span id="rating-help" class="star-hint">Choose the score that feels right.</span>
-                        </fieldset>
+                        <p class="star-hint">Choose as many as you want.</p>
+                        <p id="amenities-status" class="places-status" role="status" aria-live="polite" aria-atomic="true">Loading amenities...</p>
+                        <div id="amenities-options" class="amenities-options" aria-live="polite"></div>
                     </section>
                 </div>
 
-                <button type="submit">Submit Review</button>
+                <button type="submit">Publish Place</button>
             </form>
         </section>
     </main>
@@ -97,7 +99,6 @@
         </p>
     </footer>
 
-    <!-- GDPR cookie notice banner -->
     <div id="cookie-banner" class="hidden" role="region" aria-label="Cookie notice" aria-live="polite">
         <p>
             This site uses a strictly necessary session cookie for authentication only.
@@ -109,7 +110,6 @@
         </div>
     </div>
 
-    <!-- Privacy notice modal -->
     <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
         <div class="privacy-modal-topbar">
             <div>

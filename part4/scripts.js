@@ -1,5 +1,26 @@
 const API_BASE_URL = 'http://127.0.0.1:5000/api/v1';
 let allPlaces = [];
+const PLACE_LOCATION_STORAGE_KEY = 'place_location_labels';
+
+// Drop your own photos in part4/images/ using these filenames.
+// If a custom file is missing, the UI falls back to the local SVG artwork.
+const PLACE_IMAGE_PRESETS = [
+  {
+    preferred: 'images/lake-house.jpg',
+    fallback: 'place-lake.svg',
+    keywords: ['lake', 'water', 'coast', 'beach', 'retreat']
+  },
+  {
+    preferred: 'images/forest-cabin.jpg',
+    fallback: 'place-forest.svg',
+    keywords: ['forest', 'cabin', 'wood', 'mountain', 'nature']
+  },
+  {
+    preferred: 'images/city-stay.jpg',
+    fallback: 'place-city.svg',
+    keywords: ['city', 'urban', 'downtown', 'studio', 'apartment']
+  }
+];
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
@@ -13,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupIndexPage();
   setupPlacePage();
   setupAddReviewPage();
+  setupAddPlacePage();
 });
 
 /* =====================================================================
@@ -27,9 +49,15 @@ function setupNav() {
   const token = getCookie('token');
   const loginLink = document.getElementById('login-link');
   const logoutButton = document.getElementById('logout-button');
+  const addPlaceLink = document.getElementById('add-place-link');
 
   if (loginLink) {
     loginLink.hidden = !!token;
+  }
+
+  if (addPlaceLink) {
+    addPlaceLink.hidden = !token;
+    addPlaceLink.setAttribute('aria-hidden', String(!token));
   }
 
   if (logoutButton) {
@@ -52,8 +80,20 @@ function setupHeaderShrink() {
     return;
   }
 
+  let isCondensed = false;
+  const collapseAt = 44;
+  const expandAt = 16;
+
   const updateHeaderState = () => {
-    document.body.classList.toggle('header-condensed', window.scrollY > 18);
+    const scrollY = window.scrollY;
+
+    if (!isCondensed && scrollY > collapseAt) {
+      isCondensed = true;
+      document.body.classList.add('header-condensed');
+    } else if (isCondensed && scrollY < expandAt) {
+      isCondensed = false;
+      document.body.classList.remove('header-condensed');
+    }
   };
 
   updateHeaderState();
@@ -355,6 +395,39 @@ function setupIndexPage() {
   });
 }
 
+function getStoredPlaceLocations() {
+  try {
+    const raw = localStorage.getItem(PLACE_LOCATION_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveStoredPlaceLocations(locations) {
+  localStorage.setItem(PLACE_LOCATION_STORAGE_KEY, JSON.stringify(locations));
+}
+
+function setStoredPlaceLocation(placeId, label) {
+  if (!placeId || !label) {
+    return;
+  }
+
+  const locations = getStoredPlaceLocations();
+  locations[placeId] = label.trim();
+  saveStoredPlaceLocations(locations);
+}
+
+function getPlaceLocationLabel(place) {
+  const storedLabel = place?.id ? getStoredPlaceLocations()[place.id] : '';
+
+  if (storedLabel) {
+    return storedLabel;
+  }
+
+  return getPlaceAreaLabel(place?.latitude, place?.longitude);
+}
+
 async function fetchPlaces(token) {
   const headers = {};
 
@@ -371,14 +444,14 @@ async function fetchPlaces(token) {
     }
 
     allPlaces = Array.isArray(places) ? places : [];
-    displayPlaces(allPlaces);
+    displayPlaces(allPlaces, token);
     applyCurrentFilter();
   } catch (error) {
     setPlacesStatus('places-status', error.message, 'error');
   }
 }
 
-function displayPlaces(places) {
+function displayPlaces(places, token = getCookie('token')) {
   const placesList = document.getElementById('places-list');
 
   if (!placesList) {
@@ -395,33 +468,56 @@ function displayPlaces(places) {
     return;
   }
 
-  places.forEach((place) => {
+  places.forEach((place, index) => {
     const placeCard = document.createElement('article');
     placeCard.className = 'place-card';
     placeCard.dataset.price = String(Number(place.price) || 0);
     placeCard.dataset.reveal = 'card';
 
-    const title = place.title || 'Untitled place';
+    const title = place.title || 'New stay';
     const price = Number(place.price) || 0;
     const placeId = place.id || '';
-    const area = getPlaceAreaLabel(place.latitude, place.longitude);
-    const rateLabel = getRateLabel(price);
-    const summary = getPlaceSummary(price, area);
-    const imageSrc = getPlaceImage(place);
+    const area = getPlaceLocationLabel(place);
+    const imageChoice = getPlaceImage(place, index);
+    const initialAverageRating = getAverageRating(Array.isArray(place.reviews) ? place.reviews : []);
 
     placeCard.innerHTML = `
       <div class="place-media">
-        <img src="${escapeHtml(imageSrc)}" alt="${escapeHtml(title)}" loading="lazy">
+        <img
+          src="${escapeHtml(imageChoice.preferred)}"
+          alt="${escapeHtml(title)}"
+          loading="lazy"
+          data-fallback="${escapeHtml(imageChoice.fallback)}"
+        >
       </div>
-      <p class="place-kicker">${escapeHtml(rateLabel)}</p>
-      <h2>${escapeHtml(title)}</h2>
-      <p class="place-location">${escapeHtml(area)}</p>
-      <p class="price-tag"><strong>$${price}</strong> / night</p>
-      <p class="place-summary">${escapeHtml(summary)}</p>
-      <a href="place.html?id=${encodeURIComponent(placeId)}" class="details-button" aria-label="View details for ${escapeHtml(title)}">View Details</a>
+      <div class="place-card-body">
+        <div class="place-card-headline">
+          <div class="place-card-title-block">
+            <h2>${escapeHtml(title)}</h2>
+            <p class="place-location">${escapeHtml(area)}</p>
+          </div>
+          <p class="price-tag"><strong>$${price}</strong><span>/ night</span></p>
+        </div>
+        <div class="place-card-rating" data-place-rating>
+          ${renderCardRating(initialAverageRating)}
+        </div>
+        <a href="place.html?id=${encodeURIComponent(placeId)}" class="details-button" aria-label="View details for ${escapeHtml(title)}">View Details</a>
+      </div>
     `;
 
     const detailsLink = placeCard.querySelector('.details-button');
+    const mediaImage = placeCard.querySelector('.place-media img');
+
+    if (mediaImage) {
+      mediaImage.addEventListener('error', () => {
+        const fallback = mediaImage.dataset.fallback;
+
+        if (fallback && mediaImage.getAttribute('src') !== fallback) {
+          mediaImage.src = fallback;
+        }
+      }, { once: true });
+    }
+
     if (detailsLink) {
       detailsLink.addEventListener('click', () => {
         rememberPlace(place);
@@ -432,18 +528,86 @@ function displayPlaces(places) {
   });
 
   setupScrollReveal();
+  enrichPlaceCardsWithRatings(places, token);
 }
 
-function getPlaceImage(place) {
-  const gallery = ['place-lake.svg', 'place-forest.svg', 'place-city.svg'];
-  const seed = `${place.id || ''}${place.title || ''}${place.price || ''}`;
-  let hash = 0;
+async function enrichPlaceCardsWithRatings(places, token) {
+  const headers = {};
 
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  return gallery[hash % gallery.length];
+  const requests = places.map(async (place) => {
+    if (!place?.id) {
+      return;
+    }
+
+    const card = document.querySelector(`.place-card a[href="place.html?id=${encodeURIComponent(place.id)}"]`)?.closest('.place-card');
+    const ratingContainer = card?.querySelector('[data-place-rating]');
+
+    if (!card || !ratingContainer) {
+      return;
+    }
+
+    if (Array.isArray(place.reviews) && place.reviews.length) {
+      ratingContainer.innerHTML = renderCardRating(getAverageRating(place.reviews));
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/places/${encodeURIComponent(place.id)}`, { headers });
+      const detail = await response.json().catch(() => null);
+
+      if (!response.ok || !detail) {
+        return;
+      }
+
+      const averageRating = getAverageRating(Array.isArray(detail.reviews) ? detail.reviews : []);
+      ratingContainer.innerHTML = renderCardRating(averageRating);
+    } catch (error) {
+      // Keep the card clean if rating enrichment fails.
+    }
+  });
+
+  await Promise.all(requests);
+}
+
+function renderCardRating(averageRating) {
+  if (!averageRating) {
+    return `
+      <div class="place-card-rating-summary place-card-rating-summary--empty" aria-label="No ratings yet">
+        ${emptyStarsHtml()}
+        <span>New</span>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="place-card-rating-summary" aria-label="Average rating ${averageRating.toFixed(1)} out of 5">
+      ${starsHtml(averageRating)}
+      <span>${averageRating.toFixed(1)}</span>
+    </div>
+  `;
+}
+
+function emptyStarsHtml() {
+  const stars = Array.from({ length: 5 }, () =>
+    '<span class="star" aria-hidden="true">★</span>'
+  ).join('');
+  return `<div class="stars" role="img" aria-label="No ratings yet">${stars}</div>`;
+}
+
+function getPlaceImage(place, index = 0) {
+  const title = String(place.title || '').toLowerCase();
+
+  for (const preset of PLACE_IMAGE_PRESETS) {
+    if (preset.keywords.some((keyword) => title.includes(keyword))) {
+      return preset;
+    }
+  }
+
+  return PLACE_IMAGE_PRESETS[index % PLACE_IMAGE_PRESETS.length];
 }
 
 function getPlaceAreaLabel(latitude, longitude) {
@@ -451,37 +615,13 @@ function getPlaceAreaLabel(latitude, longitude) {
   const lng = Number(longitude);
 
   if (Number.isNaN(lat) || Number.isNaN(lng)) {
-    return 'Location shown on the detail page';
+    return 'Location coming soon';
   }
 
   const vertical = lat >= 0 ? 'Northern' : 'Southern';
   const horizontal = lng >= 0 ? 'Eastern' : 'Western';
 
-  return `${vertical} ${horizontal} area`;
-}
-
-function getRateLabel(price) {
-  if (price <= 20) {
-    return 'Lower nightly rate';
-  }
-
-  if (price <= 60) {
-    return 'Mid-range nightly rate';
-  }
-
-  return 'Higher nightly rate';
-}
-
-function getPlaceSummary(price, area) {
-  if (price <= 20) {
-    return `A simpler stay with a lighter nightly rate, located in the ${area.toLowerCase()}.`;
-  }
-
-  if (price <= 60) {
-    return `A balanced option with a moderate nightly rate, located in the ${area.toLowerCase()}.`;
-  }
-
-  return `A more premium option with a higher nightly rate, located in the ${area.toLowerCase()}.`;
+  return `${vertical} ${horizontal} side`;
 }
 
 function filterPlacesByPrice(maxPrice) {
@@ -554,6 +694,48 @@ function escapeHtml(value) {
 
 function getAuthToken() {
   return getCookie('token');
+}
+
+function getJwtIdentityFromToken(token) {
+  if (!token) {
+    return '';
+  }
+
+  try {
+    const payload = token.split('.')[1];
+
+    if (!payload) {
+      return '';
+    }
+
+    const normalized = payload.replaceAll('-', '+').replaceAll('_', '/');
+    const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
+    const padded = normalized + padding;
+    const decoded = JSON.parse(atob(padded));
+    return decoded.sub || decoded.identity || '';
+  } catch {
+    return '';
+  }
+}
+
+function getJwtPayload(token) {
+  if (!token) {
+    return {};
+  }
+
+  try {
+    const payload = token.split('.')[1];
+
+    if (!payload) {
+      return {};
+    }
+
+    const normalized = payload.replaceAll('-', '+').replaceAll('_', '/');
+    const padding = '='.repeat((4 - (normalized.length % 4)) % 4);
+    return JSON.parse(atob(normalized + padding));
+  } catch {
+    return {};
+  }
 }
 
 function getPlaceIdFromURL() {
@@ -632,15 +814,19 @@ async function fetchPlaceDetails(token, placeId) {
 }
 
 function displayPlaceDetails(place) {
-  const placeTitle = document.getElementById('place-title');
   const detailsContainer = document.getElementById('place-details-content');
   const reviewsList = document.getElementById('reviews-list');
   const placeStatus = document.getElementById('place-status');
   const reviewsStatus = document.getElementById('reviews-status');
   const placeHeroMeta = document.getElementById('place-hero-meta');
   const heroHeading = document.getElementById('page-hero-detail');
+  const heroDescription = document.getElementById('place-hero-description');
+  const token = getAuthToken();
+  const currentUserId = getJwtIdentityFromToken(token);
+  const jwtPayload = getJwtPayload(token);
+  const canModerateReviews = Boolean(jwtPayload.is_admin);
 
-  if (!placeTitle || !detailsContainer || !reviewsList) {
+  if (!detailsContainer || !reviewsList) {
     return;
   }
 
@@ -652,42 +838,43 @@ function displayPlaceDetails(place) {
     reviewsStatus.remove();
   }
 
-  const title = place.title || 'Untitled place';
+  const title = place.title || 'New stay';
   const owner = place.owner
     ? `${place.owner.first_name} ${place.owner.last_name}`.trim()
     : 'Unknown host';
-  const description = place.description || 'No description available.';
+  const description = place.description || 'A calm place with the essentials in place.';
   const price = Number(place.price) || 0;
   const amenities = Array.isArray(place.amenities) ? place.amenities : [];
   const reviews = Array.isArray(place.reviews) ? place.reviews : [];
   const amenityCount = amenities.length;
   const reviewCount = reviews.length;
+  const averageRating = getAverageRating(reviews);
+  const locationLabel = getPlaceLocationLabel(place);
 
   rememberPlace(place);
-  placeTitle.textContent = title;
   if (heroHeading) {
     heroHeading.textContent = title;
   }
+  if (heroDescription) {
+    heroDescription.textContent = description;
+  }
   if (placeHeroMeta) {
     placeHeroMeta.innerHTML = `
+      <span class="place-hero-chip">${escapeHtml(locationLabel)}</span>
       <span class="place-hero-chip">Hosted by ${escapeHtml(owner)}</span>
       <span class="place-hero-chip">$${price} per night</span>
       <span class="place-hero-chip">${amenityCount} amenit${amenityCount === 1 ? 'y' : 'ies'}</span>
+      <span class="place-hero-chip">${averageRating ? `${averageRating.toFixed(1)} / 5` : 'No rating yet'}</span>
       <span class="place-hero-chip">${reviewCount} review${reviewCount === 1 ? '' : 's'}</span>
     `;
   }
   detailsContainer.innerHTML = `
-    <article class="place-info">
-      <h2>Host</h2>
-      <p>${escapeHtml(owner)}</p>
-    </article>
-    <article class="place-info">
-      <h2>Price</h2>
-      <p>$${price} per night</p>
-    </article>
-    <article class="place-info">
-      <h2>Description</h2>
-      <p>${escapeHtml(description)}</p>
+    <article class="place-info place-info--rating">
+      <h2>Average rating</h2>
+      <div class="place-rating-summary">
+        <strong>${averageRating ? averageRating.toFixed(1) : '—'}</strong>
+        ${averageRating ? starsHtml(averageRating) : '<p class="place-rating-empty">No ratings yet</p>'}
+      </div>
     </article>
     <article class="place-info">
       <h2>Amenities</h2>
@@ -709,6 +896,7 @@ function displayPlaceDetails(place) {
     const reviewCard = document.createElement('article');
     reviewCard.className = 'review-card';
     const initial = (review.user_id || '?').toString().charAt(0).toUpperCase();
+    const canDeleteReview = Boolean(token) && (canModerateReviews || review.user_id === currentUserId);
     reviewCard.innerHTML = `
       <div class="review-card-header">
         <div class="review-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
@@ -716,9 +904,35 @@ function displayPlaceDetails(place) {
           <h3>Guest ${escapeHtml(review.user_id || 'Unknown')}</h3>
           ${starsHtml(review.rating)}
         </div>
+        ${canDeleteReview ? `<button type="button" class="review-delete-button" data-review-id="${escapeHtml(review.id || '')}">Delete</button>` : ''}
       </div>
       <p>${escapeHtml(review.text || '')}</p>
     `;
+
+    const deleteButton = reviewCard.querySelector('.review-delete-button');
+    if (deleteButton) {
+      deleteButton.addEventListener('click', async () => {
+        if (!token || !review.id || !window.confirm('Delete this review?')) {
+          return;
+        }
+
+        deleteButton.disabled = true;
+
+        try {
+          await deleteReview(token, review.id);
+          fetchPlaceDetails(token, place.id);
+        } catch (error) {
+          const inlineStatus = document.createElement('p');
+          inlineStatus.className = 'places-status places-status--error';
+          inlineStatus.setAttribute('role', 'alert');
+          inlineStatus.setAttribute('aria-live', 'assertive');
+          inlineStatus.textContent = error.message;
+          reviewsList.prepend(inlineStatus);
+          deleteButton.disabled = false;
+        }
+      });
+    }
+
     reviewsList.appendChild(reviewCard);
   });
 }
@@ -731,6 +945,23 @@ function buildAmenitiesList(amenities) {
   return amenities
     .map((amenity) => `<li>${escapeHtml(amenity.name || 'Unnamed amenity')}</li>`)
     .join('');
+}
+
+function getAverageRating(reviews) {
+  if (!reviews.length) {
+    return 0;
+  }
+
+  const validRatings = reviews
+    .map((review) => Number(review.rating))
+    .filter((rating) => !Number.isNaN(rating) && rating > 0);
+
+  if (!validRatings.length) {
+    return 0;
+  }
+
+  const total = validRatings.reduce((sum, rating) => sum + rating, 0);
+  return total / validRatings.length;
 }
 
 function setPlacesStatus(id, message, type = 'status') {
@@ -829,7 +1060,6 @@ function setupAddReviewPage() {
 
 async function loadReviewedPlaceName(token, placeId) {
   const placeNameElement = document.getElementById('reviewed-place-name');
-  const reviewHeroMeta = document.getElementById('review-hero-meta');
   const headers = {};
 
   if (token) {
@@ -847,23 +1077,9 @@ async function loadReviewedPlaceName(token, placeId) {
     if (placeNameElement) {
       placeNameElement.textContent = place.title || 'this place';
     }
-    if (reviewHeroMeta) {
-      reviewHeroMeta.innerHTML = `
-        <span class="review-hero-chip">Reviewing ${escapeHtml(place.title || 'this place')}</span>
-        <span class="review-hero-chip">1 to 5 stars</span>
-        <span class="review-hero-chip">Signed-in guests only</span>
-      `;
-    }
   } catch {
     if (placeNameElement) {
       placeNameElement.textContent = 'this place';
-    }
-    if (reviewHeroMeta) {
-      reviewHeroMeta.innerHTML = `
-        <span class="review-hero-chip">Reviewing this place</span>
-        <span class="review-hero-chip">1 to 5 stars</span>
-        <span class="review-hero-chip">Signed-in guests only</span>
-      `;
     }
   }
 }
@@ -886,6 +1102,202 @@ async function submitReview(token, placeId, reviewText, rating) {
 
   if (!response.ok) {
     throw new Error(data.error || 'Failed to submit review.');
+  }
+
+  return data;
+}
+
+async function deleteReview(token, reviewId) {
+  const response = await fetch(`${API_BASE_URL}/reviews/${encodeURIComponent(reviewId)}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to delete review.');
+  }
+
+  return data;
+}
+
+/* =====================================================================
+   Add place page
+   ===================================================================== */
+
+function setupAddPlacePage() {
+  const placeForm = document.getElementById('place-form');
+
+  if (!placeForm) {
+    return;
+  }
+
+  const token = getAuthToken();
+
+  if (!token) {
+    redirectToIndexWithNotice('Please log in before publishing a place.');
+    return;
+  }
+
+  loadAmenities(token);
+
+  placeForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const titleInput = document.getElementById('place-title');
+    const descriptionInput = document.getElementById('place-description');
+    const priceInput = document.getElementById('place-price');
+    const locationInput = document.getElementById('place-location-name');
+    const latitudeInput = document.getElementById('place-latitude');
+    const longitudeInput = document.getElementById('place-longitude');
+    const messageElement = document.getElementById('place-message');
+    const submitButton = placeForm.querySelector('button[type="submit"]');
+
+    if (!titleInput || !descriptionInput || !priceInput || !locationInput || !latitudeInput || !longitudeInput || !messageElement || !submitButton) {
+      return;
+    }
+
+    clearFieldValidity(titleInput, descriptionInput, priceInput, locationInput, latitudeInput, longitudeInput);
+
+    if (!titleInput.value.trim()) {
+      setFieldValidity(titleInput, true);
+      setMessage(messageElement, 'Add a title for your place.', 'error');
+      titleInput.focus();
+      return;
+    }
+
+    if (priceInput.value === '' || Number(priceInput.value) < 0) {
+      setFieldValidity(priceInput, true);
+      setMessage(messageElement, 'Enter a valid nightly price.', 'error');
+      priceInput.focus();
+      return;
+    }
+
+    if (!locationInput.value.trim()) {
+      setFieldValidity(locationInput, true);
+      setMessage(messageElement, 'Add a readable location for the place.', 'error');
+      locationInput.focus();
+      return;
+    }
+
+    if (latitudeInput.value === '' || Number(latitudeInput.value) < -90 || Number(latitudeInput.value) > 90) {
+      setFieldValidity(latitudeInput, true);
+      setMessage(messageElement, 'Latitude must be between -90 and 90.', 'error');
+      latitudeInput.focus();
+      return;
+    }
+
+    if (longitudeInput.value === '' || Number(longitudeInput.value) < -180 || Number(longitudeInput.value) > 180) {
+      setFieldValidity(longitudeInput, true);
+      setMessage(messageElement, 'Longitude must be between -180 and 180.', 'error');
+      longitudeInput.focus();
+      return;
+    }
+
+    const selectedAmenities = Array.from(placeForm.querySelectorAll('input[name="amenities"]:checked'))
+      .map((input) => input.value);
+
+    setMessage(messageElement, 'Publishing place…', 'success');
+    submitButton.disabled = true;
+    placeForm.setAttribute('aria-busy', 'true');
+
+    try {
+      const createdPlace = await submitPlace(token, {
+        title: titleInput.value.trim(),
+        description: descriptionInput.value.trim(),
+        price: Number(priceInput.value),
+        latitude: Number(latitudeInput.value),
+        longitude: Number(longitudeInput.value),
+        owner_id: getJwtIdentityFromToken(token) || 'current-user',
+        amenities: selectedAmenities
+      });
+
+      setStoredPlaceLocation(createdPlace.id, locationInput.value.trim());
+      setSiteNotice('Place published successfully.');
+      window.location.href = `place.html?id=${encodeURIComponent(createdPlace.id)}`;
+    } catch (error) {
+      setMessage(messageElement, error.message, 'error');
+    } finally {
+      submitButton.disabled = false;
+      placeForm.removeAttribute('aria-busy');
+    }
+  });
+}
+
+async function loadAmenities(token) {
+  const amenitiesContainer = document.getElementById('amenities-options');
+  const amenitiesStatus = document.getElementById('amenities-status');
+  const headers = {};
+
+  if (!amenitiesContainer) {
+    return;
+  }
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/`, { headers });
+    const amenities = await response.json().catch(() => []);
+
+    if (!response.ok) {
+      throw new Error('Unable to load amenities.');
+    }
+
+    amenitiesContainer.innerHTML = '';
+
+    if (!Array.isArray(amenities) || !amenities.length) {
+      amenitiesContainer.innerHTML = '<p class="amenities-empty">No amenities available right now.</p>';
+      return;
+    }
+
+    amenities.forEach((amenity) => {
+      const label = document.createElement('label');
+      label.className = 'amenity-option';
+      label.innerHTML = `
+        <input type="checkbox" name="amenities" value="${escapeHtml(amenity.id)}">
+        <span>${escapeHtml(amenity.name)}</span>
+      `;
+      amenitiesContainer.appendChild(label);
+    });
+
+    if (amenitiesStatus) {
+      amenitiesStatus.remove();
+    }
+  } catch (error) {
+    if (amenitiesStatus) {
+      amenitiesStatus.textContent = error.message;
+      amenitiesStatus.classList.add('places-status--error');
+    }
+  }
+}
+
+async function submitPlace(token, payload) {
+  const response = await fetch(`${API_BASE_URL}/places/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      document.cookie = 'token=; max-age=0; path=/; SameSite=Lax';
+      throw new Error('Your session is no longer valid. Please log in again.');
+    }
+
+    const detailedMessage = data.error || data.message || (
+      data.errors ? Object.values(data.errors).join(' ') : ''
+    );
+    throw new Error(detailedMessage || 'Failed to publish place.');
   }
 
   return data;

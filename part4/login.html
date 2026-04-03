@@ -13,11 +13,11 @@
 
     <header>
         <a href="index.html" class="logo-link">
-            <img src="logo.png" alt="HBnB" class="logo">
             <span class="logo-name">HBnB</span>
         </a>
         <nav aria-label="Main navigation">
             <a href="index.html">Home</a>
+            <a href="add_place.html" id="add-place-link" hidden>Add Place</a>
             <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
                 <span class="theme-toggle-icon" aria-hidden="true">☾</span>
             </button>
@@ -30,14 +30,14 @@
         <section class="page-hero page-hero--compact" aria-labelledby="page-hero-login">
             <p class="eyebrow">Account access</p>
             <h1 id="page-hero-login">Pick up where you left off.</h1>
-            <p class="page-hero-copy">Sign in to save your session, open place details, and leave a review without losing the calm tone of the experience.</p>
+            <p class="page-hero-copy">Sign in to open saved stays, leave a review, and keep browsing without interruption.</p>
         </section>
 
         <section class="login-section" aria-labelledby="login-heading">
             <form id="login-form" method="post" novalidate>
                 <p class="form-kicker">Sign in</p>
                 <h2 id="login-heading">Login</h2>
-                <p class="form-copy">Use your HBnB account to book a place or leave a review.</p>
+                <p class="form-copy">Use your HBnB account to continue.</p>
                 <p id="login-message" class="form-message" aria-live="polite" aria-atomic="true" role="status"></p>
 
                 <label for="email">Email address</label>
