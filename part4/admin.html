@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Log in to your HBnB account to book places and leave reviews.">
-    <title>HBnB – Login</title>
+    <meta name="description" content="HBnB administration panel — manage amenities and places.">
+    <title>HBnB – Admin</title>
     <link rel="icon" type="image/png" href="icon.png">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -19,54 +19,66 @@
             <a href="index.html">Home</a>
             <a href="add_place.html" id="add-place-link" hidden>Add Place</a>
             <a href="my_places.html" id="my-places-link" hidden>My Places</a>
-            <a href="admin.html" id="admin-link" hidden>Admin</a>
+            <a href="admin.html" id="admin-link" aria-current="page" hidden>Admin</a>
             <button type="button" id="theme-toggle" class="theme-toggle" aria-pressed="false" aria-label="Switch to night mode">
                 <span class="theme-toggle-icon" aria-hidden="true">☾</span>
             </button>
-            <a href="login.html" id="login-link" class="login-button" aria-current="page">Login</a>
+            <a href="login.html" id="login-link" class="login-button">Login</a>
             <button type="button" id="logout-button" class="logout-button" hidden>Log out</button>
         </nav>
     </header>
 
     <main id="main-content" class="page-shell" tabindex="-1">
-        <section class="page-hero page-hero--compact" aria-labelledby="page-hero-login">
-            <p class="eyebrow">Account access</p>
-            <h1 id="page-hero-login">Pick up where you left off.</h1>
-            <p class="page-hero-copy">Sign in to open saved stays, leave a review, and keep browsing without interruption.</p>
+        <section class="page-hero page-hero--compact" aria-labelledby="admin-hero-heading">
+            <p class="eyebrow">Administration</p>
+            <h1 id="admin-hero-heading">Manage the platform.</h1>
+            <p class="page-hero-copy">Add or remove amenities, oversee all listings, and keep the platform in order.</p>
         </section>
 
-        <section class="login-section" aria-labelledby="login-heading">
-            <form id="login-form" method="post" novalidate>
-                <p class="form-kicker">Sign in</p>
-                <h2 id="login-heading">Login</h2>
-                <p class="form-copy">Use your HBnB account to continue.</p>
-                <p id="login-message" class="form-message" aria-live="polite" aria-atomic="true" role="status"></p>
+        <div class="listing-panel listing-panel--minimal" id="admin-shell">
 
-                <label for="email">Email address</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    autocomplete="email"
-                    required
-                    aria-required="true"
-                    aria-describedby="login-message"
-                >
+            <!-- Tab bar -->
+            <div class="admin-tabs" role="tablist" aria-label="Admin sections">
+                <button class="admin-tab is-active" role="tab" aria-selected="true" aria-controls="tab-amenities" data-tab="amenities">Amenities</button>
+                <button class="admin-tab" role="tab" aria-selected="false" aria-controls="tab-places" data-tab="places">Places</button>
+            </div>
 
-                <label for="password">Password</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    autocomplete="current-password"
-                    required
-                    aria-required="true"
-                    aria-describedby="login-message"
-                >
+            <!-- Amenities panel -->
+            <div id="tab-amenities" class="admin-panel" role="tabpanel">
+                <div class="listing-panel__header listing-panel__header--minimal">
+                    <div><h2>Amenities</h2></div>
+                </div>
 
-                <button type="submit">Login</button>
-            </form>
-        </section>
+                <form id="admin-amenity-form" novalidate class="admin-add-form" aria-label="Add a new amenity">
+                    <input
+                        id="new-amenity-name"
+                        type="text"
+                        maxlength="50"
+                        required
+                        aria-required="true"
+                        placeholder="New amenity name…"
+                        aria-label="Amenity name"
+                    >
+                    <button type="submit" class="details-button">Add</button>
+                </form>
+                <p id="admin-amenities-message" class="form-message" aria-live="polite" aria-atomic="true" role="status"></p>
+
+                <div id="admin-amenities-list" aria-live="polite">
+                    <p id="admin-amenities-status" class="places-status" role="status" aria-live="polite" aria-atomic="true">Loading amenities…</p>
+                </div>
+            </div>
+
+            <!-- Places panel -->
+            <div id="tab-places" class="admin-panel" role="tabpanel" hidden>
+                <div class="listing-panel__header listing-panel__header--minimal">
+                    <div><h2>All places</h2></div>
+                </div>
+                <div id="admin-places-list" aria-live="polite">
+                    <p id="admin-places-status" class="places-status" role="status" aria-live="polite" aria-atomic="true">Loading places…</p>
+                </div>
+            </div>
+
+        </div>
     </main>
 
     <footer>
@@ -76,7 +88,6 @@
         </p>
     </footer>
 
-    <!-- GDPR cookie notice banner -->
     <div id="cookie-banner" class="hidden" role="region" aria-label="Cookie notice" aria-live="polite">
         <p>
             This site uses a strictly necessary session cookie for authentication only.
@@ -88,7 +99,6 @@
         </div>
     </div>
 
-    <!-- Privacy notice modal -->
     <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
         <div class="privacy-modal-topbar">
             <div>

@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupPlacePage();
   setupAddReviewPage();
   setupAddPlacePage();
+  setupAdminPage();
 });
 
 /* =====================================================================
@@ -52,6 +53,7 @@ function setupNav() {
   const logoutButton = document.getElementById('logout-button');
   const addPlaceLink = document.getElementById('add-place-link');
   const myPlacesLink = document.getElementById('my-places-link');
+  const adminLink = document.getElementById('admin-link');
 
   if (loginLink) {
     loginLink.hidden = !!token;
@@ -65,6 +67,12 @@ function setupNav() {
   if (myPlacesLink) {
     myPlacesLink.hidden = !token;
     myPlacesLink.setAttribute('aria-hidden', String(!token));
+  }
+
+  if (adminLink) {
+    const isAdmin = Boolean(token && getJwtPayload(token).is_admin);
+    adminLink.hidden = !isAdmin;
+    adminLink.setAttribute('aria-hidden', String(!isAdmin));
   }
 
   if (logoutButton) {
@@ -1703,6 +1711,335 @@ async function updatePlace(token, placeId, payload) {
   }
 
   return data;
+}
+
+/* =====================================================================
+   Admin page
+   ===================================================================== */
+
+function setupAdminPage() {
+  const adminShell = document.getElementById('admin-shell');
+
+  if (!adminShell) {
+    return;
+  }
+
+  const token = getAuthToken();
+
+  if (!token) {
+    redirectToIndexWithNotice('Please log in to access the admin panel.');
+    return;
+  }
+
+  const jwtPayload = getJwtPayload(token);
+
+  if (!jwtPayload.is_admin) {
+    redirectToIndexWithNotice('Access restricted to administrators.');
+    return;
+  }
+
+  adminShell.classList.add('is-visible');
+
+  setupAdminTabs();
+  loadAdminAmenities(token);
+  loadAdminPlaces(token);
+}
+
+function setupAdminTabs() {
+  const tabs = document.querySelectorAll('.admin-tab');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((t) => {
+        t.classList.remove('is-active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('is-active');
+      tab.setAttribute('aria-selected', 'true');
+
+      document.querySelectorAll('.admin-panel').forEach((panel) => {
+        panel.hidden = panel.id !== `tab-${tab.dataset.tab}`;
+      });
+    });
+  });
+}
+
+async function loadAdminAmenities(token) {
+  const list = document.getElementById('admin-amenities-list');
+  const status = document.getElementById('admin-amenities-status');
+  const form = document.getElementById('admin-amenity-form');
+  const msg = document.getElementById('admin-amenities-message');
+
+  if (!list) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/amenities/`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const amenities = await response.json().catch(() => []);
+
+    if (!response.ok) {
+      throw new Error('Failed to load amenities.');
+    }
+
+    if (status) {
+      status.remove();
+    }
+    list.innerHTML = '';
+
+    if (!amenities.length) {
+      list.innerHTML = '<p class="places-status">No amenities yet. Add one above.</p>';
+    } else {
+      amenities.forEach((amenity) => {
+        list.appendChild(createAdminAmenityRow(amenity, token, list));
+      });
+    }
+  } catch (error) {
+    if (status) {
+      status.className = 'places-status places-status--error';
+      status.textContent = error.message;
+    }
+  }
+
+  if (form) {
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const input = form.querySelector('#new-amenity-name');
+      const btn = form.querySelector('button[type="submit"]');
+      const name = input?.value.trim();
+
+      if (!name) {
+        return;
+      }
+
+      btn.disabled = true;
+
+      try {
+        const amenity = await addAmenity(token, name);
+        input.value = '';
+        list.querySelectorAll('.places-status').forEach((el) => el.remove());
+        list.insertBefore(createAdminAmenityRow(amenity, token, list), list.firstChild);
+        if (msg) {
+          setMessage(msg, 'Amenity added.', 'success');
+        }
+      } catch (err) {
+        if (msg) {
+          setMessage(msg, err.message, 'error');
+        }
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  }
+}
+
+function createAdminAmenityRow(amenity, token, list) {
+  const row = document.createElement('div');
+  row.className = 'admin-row';
+  row.dataset.amenityId = amenity.id;
+
+  const renderView = () => {
+    row.innerHTML = `
+      <span class="admin-row__name">${escapeHtml(amenity.name)}</span>
+      <div class="admin-row__actions">
+        <button type="button" class="details-button details-button--secondary">Edit</button>
+        <button type="button" class="details-button details-button--danger">Delete</button>
+      </div>
+    `;
+
+    row.querySelector('.details-button--secondary').addEventListener('click', renderEdit);
+    row.querySelector('.details-button--danger').addEventListener('click', handleDelete);
+  };
+
+  const renderEdit = () => {
+    row.innerHTML = `
+      <input type="text" class="admin-row__input" value="${escapeHtml(amenity.name)}" maxlength="50" aria-label="Edit amenity name">
+      <div class="admin-row__actions">
+        <button type="button" class="details-button">Save</button>
+        <button type="button" class="details-button details-button--secondary">Cancel</button>
+      </div>
+    `;
+
+    const input = row.querySelector('.admin-row__input');
+    input.focus();
+    input.select();
+
+    row.querySelector('.details-button:not(.details-button--secondary)').addEventListener('click', async () => {
+      const newName = input.value.trim();
+
+      if (!newName) {
+        return;
+      }
+
+      try {
+        await updateAmenity(token, amenity.id, newName);
+        amenity.name = newName;
+        renderView();
+      } catch (err) {
+        // eslint-disable-next-line no-alert
+        alert(err.message);
+      }
+    });
+
+    row.querySelector('.details-button--secondary').addEventListener('click', renderView);
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Delete amenity "${amenity.name}"?`)) {
+      return;
+    }
+
+    const deleteBtn = row.querySelector('.details-button--danger');
+    if (deleteBtn) {
+      deleteBtn.disabled = true;
+    }
+
+    try {
+      await deleteAmenity(token, amenity.id);
+      row.remove();
+      if (!list.querySelector('.admin-row')) {
+        list.innerHTML = '<p class="places-status">No amenities yet. Add one above.</p>';
+      }
+    } catch (err) {
+      // eslint-disable-next-line no-alert
+      alert(err.message);
+      if (deleteBtn) {
+        deleteBtn.disabled = false;
+      }
+    }
+  };
+
+  renderView();
+  return row;
+}
+
+async function loadAdminPlaces(token) {
+  const list = document.getElementById('admin-places-list');
+  const status = document.getElementById('admin-places-status');
+
+  if (!list) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/places/`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const places = await response.json().catch(() => []);
+
+    if (!response.ok) {
+      throw new Error('Failed to load places.');
+    }
+
+    if (status) {
+      status.remove();
+    }
+    list.innerHTML = '';
+
+    if (!places.length) {
+      list.innerHTML = '<p class="places-status">No places yet.</p>';
+      return;
+    }
+
+    places.forEach((place) => {
+      const title = place.title || 'Untitled';
+      const price = Number(place.price) || 0;
+      const row = document.createElement('div');
+      row.className = 'admin-row';
+      row.innerHTML = `
+        <div class="admin-row__info">
+          <span class="admin-row__name">${escapeHtml(title)}</span>
+          <span class="admin-row__meta">$${price} / night</span>
+        </div>
+        <div class="admin-row__actions">
+          <a href="place.html?id=${encodeURIComponent(place.id)}" class="details-button details-button--secondary">View</a>
+          <button type="button" class="details-button details-button--danger">Delete</button>
+        </div>
+      `;
+
+      row.querySelector('.details-button--danger').addEventListener('click', async () => {
+        if (!window.confirm(`Delete "${title}"? This cannot be undone.`)) {
+          return;
+        }
+
+        const deleteBtn = row.querySelector('.details-button--danger');
+        deleteBtn.disabled = true;
+
+        try {
+          await deletePlace(token, place.id);
+          row.remove();
+          if (!list.querySelector('.admin-row')) {
+            list.innerHTML = '<p class="places-status">No places.</p>';
+          }
+        } catch (err) {
+          // eslint-disable-next-line no-alert
+          alert(err.message);
+          deleteBtn.disabled = false;
+        }
+      });
+
+      list.appendChild(row);
+    });
+  } catch (error) {
+    if (status) {
+      status.className = 'places-status places-status--error';
+      status.textContent = error.message;
+    }
+  }
+}
+
+async function addAmenity(token, name) {
+  const response = await fetch(`${API_BASE_URL}/amenities/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ name })
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to add amenity.');
+  }
+
+  return data;
+}
+
+async function updateAmenity(token, amenityId, name) {
+  const response = await fetch(`${API_BASE_URL}/amenities/${encodeURIComponent(amenityId)}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ name })
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Failed to update amenity.');
+  }
+
+  return data;
+}
+
+async function deleteAmenity(token, amenityId) {
+  const response = await fetch(`${API_BASE_URL}/amenities/${encodeURIComponent(amenityId)}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.error || 'Failed to delete amenity.');
+  }
 }
 
 async function deletePlace(token, placeId) {
