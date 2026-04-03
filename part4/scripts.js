@@ -467,6 +467,7 @@ async function loadMyPlaces(token, placesList, statusElement) {
 
     if (listingPanel) {
       listingPanel.classList.remove('listing-panel--empty');
+      listingPanel.classList.add('is-visible');
     }
 
     ownedPlaces.forEach((place, index) => {
@@ -477,6 +478,41 @@ async function loadMyPlaces(token, placesList, statusElement) {
         secondaryHref: `add_place.html?id=${encodeURIComponent(place.id)}&mode=edit`
       });
       card.classList.add('is-visible');
+
+      const actionsContainer = card.querySelector('.place-card-actions');
+      if (actionsContainer && place.id) {
+        const deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'details-button details-button--danger';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.setAttribute('aria-label', `Delete ${place.title || 'this place'}`);
+        actionsContainer.appendChild(deleteBtn);
+
+        deleteBtn.addEventListener('click', async () => {
+          if (!window.confirm('Delete this place? This cannot be undone.')) {
+            return;
+          }
+          deleteBtn.disabled = true;
+          try {
+            await deletePlace(token, place.id);
+            card.remove();
+            if (!placesList.querySelector('.place-card')) {
+              const emptyState = document.createElement('p');
+              emptyState.className = 'places-status places-status--empty';
+              emptyState.textContent = 'You have not published any places yet. Create one and it will appear here.';
+              placesList.appendChild(emptyState);
+              if (listingPanel) {
+                listingPanel.classList.add('listing-panel--empty');
+              }
+            }
+          } catch (error) {
+            // eslint-disable-next-line no-alert
+            alert(error.message || 'Failed to delete place.');
+            deleteBtn.disabled = false;
+          }
+        });
+      }
+
       placesList.appendChild(card);
     });
 
@@ -1667,4 +1703,22 @@ async function updatePlace(token, placeId, payload) {
   }
 
   return data;
+}
+
+async function deletePlace(token, placeId) {
+  const response = await fetch(`${API_BASE_URL}/places/${encodeURIComponent(placeId)}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    if (response.status === 401) {
+      document.cookie = 'token=; max-age=0; path=/; SameSite=Lax';
+      throw new Error('Your session is no longer valid. Please log in again.');
+    }
+    throw new Error(data.error || 'Failed to delete place.');
+  }
 }

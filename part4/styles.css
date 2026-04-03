@@ -776,6 +776,11 @@ main {
   margin: 0 auto;
 }
 
+.page-shell .listing-panel--minimal {
+  margin-top: 0;
+  transform: none;
+}
+
 .page-hero {
   position: relative;
   overflow: hidden;
@@ -2049,6 +2054,26 @@ body[data-theme="dark"] .places-status {
   box-shadow: none;
 }
 
+.details-button--danger {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid rgba(199, 99, 66, 0.22);
+  box-shadow: none;
+}
+
+.details-button--danger:hover,
+.details-button--danger:focus-visible {
+  background: rgba(199, 99, 66, 0.08);
+  border-color: rgba(199, 99, 66, 0.4);
+  box-shadow: none;
+}
+
+.details-button--danger:disabled {
+  opacity: 0.6;
+  cursor: wait;
+  transform: none;
+}
+
 body[data-theme="dark"] .place-card .details-button {
   box-shadow: 0 12px 26px rgba(240, 138, 93, 0.18);
 }
@@ -2056,6 +2081,12 @@ body[data-theme="dark"] .place-card .details-button {
 body[data-theme="dark"] .details-button--secondary {
   color: var(--text);
   border-color: rgba(255, 233, 219, 0.12);
+  background: rgba(255,255,255,0.03);
+}
+
+body[data-theme="dark"] .details-button--danger {
+  color: #F2A87A;
+  border-color: rgba(240, 138, 93, 0.2);
   background: rgba(255,255,255,0.03);
 }
 
