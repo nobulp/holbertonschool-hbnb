@@ -8,7 +8,7 @@ const PLACE_IMAGE_PRESETS = [
   {
     preferred: 'images/lake-house.jpg',
     fallback: 'place-lake.svg',
-    keywords: ['lake', 'water', 'coast', 'beach', 'retreat']
+    keywords: ['lake', 'water', 'coast', 'beach', 'retreat', 'khxwb']
   },
   {
     preferred: 'images/forest-cabin.jpg',
@@ -18,7 +18,7 @@ const PLACE_IMAGE_PRESETS = [
   {
     preferred: 'images/city-stay.jpg',
     fallback: 'place-city.svg',
-    keywords: ['city', 'urban', 'downtown', 'studio', 'apartment']
+    keywords: ['city', 'urban', 'downtown', 'studio', 'apartment', 'appart', 'apt', 'flat']
   }
 ];
 
