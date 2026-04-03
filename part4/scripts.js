@@ -347,14 +347,18 @@ function displayPlaces(places) {
     placeCard.dataset.price = String(Number(place.price) || 0);
 
     const title = place.title || 'Untitled place';
-    const description = place.description || 'No description available.';
     const price = Number(place.price) || 0;
     const placeId = place.id || '';
+    const area = getPlaceAreaLabel(place.latitude, place.longitude);
+    const rateLabel = getRateLabel(price);
+    const summary = getPlaceSummary(price, area);
 
     placeCard.innerHTML = `
+      <p class="place-kicker">${escapeHtml(rateLabel)}</p>
       <h2>${escapeHtml(title)}</h2>
+      <p class="place-location">${escapeHtml(area)}</p>
       <p class="price-tag"><strong>$${price}</strong> / night</p>
-      <p>${escapeHtml(description)}</p>
+      <p class="place-summary">${escapeHtml(summary)}</p>
       <a href="place.html?id=${encodeURIComponent(placeId)}" class="details-button">View Details</a>
     `;
 
@@ -367,6 +371,44 @@ function displayPlaces(places) {
 
     placesList.appendChild(placeCard);
   });
+}
+
+function getPlaceAreaLabel(latitude, longitude) {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+
+  if (Number.isNaN(lat) || Number.isNaN(lng)) {
+    return 'Location shown on the detail page';
+  }
+
+  const vertical = lat >= 0 ? 'Northern' : 'Southern';
+  const horizontal = lng >= 0 ? 'Eastern' : 'Western';
+
+  return `${vertical} ${horizontal} area`;
+}
+
+function getRateLabel(price) {
+  if (price <= 20) {
+    return 'Lower nightly rate';
+  }
+
+  if (price <= 60) {
+    return 'Mid-range nightly rate';
+  }
+
+  return 'Higher nightly rate';
+}
+
+function getPlaceSummary(price, area) {
+  if (price <= 20) {
+    return `A simpler stay with a lighter nightly rate, located in the ${area.toLowerCase()}.`;
+  }
+
+  if (price <= 60) {
+    return `A balanced option with a moderate nightly rate, located in the ${area.toLowerCase()}.`;
+  }
+
+  return `A more premium option with a higher nightly rate, located in the ${area.toLowerCase()}.`;
 }
 
 function filterPlacesByPrice(maxPrice) {

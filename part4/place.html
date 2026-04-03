@@ -70,36 +70,45 @@
 
     <!-- Privacy notice modal -->
     <dialog id="privacy-modal" aria-labelledby="privacy-modal-title">
-        <h2 id="privacy-modal-title">Privacy Notice</h2>
+        <div class="privacy-modal-topbar">
+            <div>
+                <p class="privacy-modal-kicker">Transparency first</p>
+                <h2 id="privacy-modal-title">Privacy Notice</h2>
+            </div>
+            <button type="button" id="privacy-modal-close" class="privacy-modal-close" aria-label="Close privacy notice">
+                <span aria-hidden="true">✕</span>
+            </button>
+        </div>
         <section>
             <h3>Data collected</h3>
             <p>
-                When you log in, your email address and password are sent to our API over a secure
-                connection. A JWT session token is then stored in a browser cookie to keep you
-                authenticated during your visit.
+                When you sign in, we only use the information needed to open your session. Your
+                email address and password are sent securely to our API, and a session token is
+                then stored in your browser so you can stay connected while you browse.
             </p>
         </section>
         <section>
             <h3>Cookie used</h3>
             <p>
-                <strong>token</strong> — session cookie, expires after 1&nbsp;day. Strictly
-                necessary for authentication. Not used for tracking or advertising.
+                We use a single cookie called <strong>token</strong>. It keeps your session active,
+                expires after 1&nbsp;day, and is only there for authentication. It is not used for
+                tracking, analytics, or advertising.
             </p>
         </section>
         <section>
             <h3>Your rights (GDPR / RGPD)</h3>
             <ul>
-                <li>Right of access to your personal data</li>
-                <li>Right to rectification</li>
-                <li>Right to erasure ("right to be forgotten")</li>
-                <li>Right to data portability</li>
+                <li>You can ask to access your personal data</li>
+                <li>You can ask to correct inaccurate information</li>
+                <li>You can ask to delete your data</li>
+                <li>You can ask to receive your data in a portable format</li>
             </ul>
             <p>
-                To exercise your rights, contact the site administrator. You can delete your session
-                cookie at any time by logging out or clearing your browser cookies.
+                If you want to exercise one of these rights, contact the site administrator. You
+                can also end your session at any time by logging out or clearing your browser
+                cookies.
             </p>
         </section>
-        <button type="button" id="privacy-modal-close">Close</button>
     </dialog>
 
     <script src="scripts.js"></script>
