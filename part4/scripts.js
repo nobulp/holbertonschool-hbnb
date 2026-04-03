@@ -541,6 +541,8 @@ function displayPlaceDetails(place) {
   const reviewsList = document.getElementById('reviews-list');
   const placeStatus = document.getElementById('place-status');
   const reviewsStatus = document.getElementById('reviews-status');
+  const placeHeroMeta = document.getElementById('place-hero-meta');
+  const heroHeading = document.getElementById('page-hero-detail');
 
   if (!placeTitle || !detailsContainer || !reviewsList) {
     return;
@@ -562,9 +564,22 @@ function displayPlaceDetails(place) {
   const price = Number(place.price) || 0;
   const amenities = Array.isArray(place.amenities) ? place.amenities : [];
   const reviews = Array.isArray(place.reviews) ? place.reviews : [];
+  const amenityCount = amenities.length;
+  const reviewCount = reviews.length;
 
   rememberPlace(place);
   placeTitle.textContent = title;
+  if (heroHeading) {
+    heroHeading.textContent = title;
+  }
+  if (placeHeroMeta) {
+    placeHeroMeta.innerHTML = `
+      <span class="place-hero-chip">Hosted by ${escapeHtml(owner)}</span>
+      <span class="place-hero-chip">$${price} per night</span>
+      <span class="place-hero-chip">${amenityCount} amenit${amenityCount === 1 ? 'y' : 'ies'}</span>
+      <span class="place-hero-chip">${reviewCount} review${reviewCount === 1 ? '' : 's'}</span>
+    `;
+  }
   detailsContainer.innerHTML = `
     <article class="place-info">
       <h2>Host</h2>
@@ -602,7 +617,7 @@ function displayPlaceDetails(place) {
       <div class="review-card-header">
         <div class="review-avatar" aria-hidden="true">${escapeHtml(initial)}</div>
         <div>
-          <h3>User ${escapeHtml(review.user_id || 'Unknown')}</h3>
+          <h3>Guest ${escapeHtml(review.user_id || 'Unknown')}</h3>
           ${starsHtml(review.rating)}
         </div>
       </div>
@@ -698,6 +713,7 @@ function setupAddReviewPage() {
 
 async function loadReviewedPlaceName(token, placeId) {
   const placeNameElement = document.getElementById('reviewed-place-name');
+  const reviewHeroMeta = document.getElementById('review-hero-meta');
   const headers = {};
 
   if (token) {
@@ -715,9 +731,23 @@ async function loadReviewedPlaceName(token, placeId) {
     if (placeNameElement) {
       placeNameElement.textContent = place.title || 'this place';
     }
+    if (reviewHeroMeta) {
+      reviewHeroMeta.innerHTML = `
+        <span class="review-hero-chip">Reviewing ${escapeHtml(place.title || 'this place')}</span>
+        <span class="review-hero-chip">1 to 5 stars</span>
+        <span class="review-hero-chip">Signed-in guests only</span>
+      `;
+    }
   } catch {
     if (placeNameElement) {
       placeNameElement.textContent = 'this place';
+    }
+    if (reviewHeroMeta) {
+      reviewHeroMeta.innerHTML = `
+        <span class="review-hero-chip">Reviewing this place</span>
+        <span class="review-hero-chip">1 to 5 stars</span>
+        <span class="review-hero-chip">Signed-in guests only</span>
+      `;
     }
   }
 }

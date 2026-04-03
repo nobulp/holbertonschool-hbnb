@@ -26,43 +26,68 @@
         </nav>
     </header>
 
-    <main id="main-content">
+    <main id="main-content" class="page-shell">
+        <section class="page-hero page-hero--compact" aria-labelledby="page-hero-review">
+            <p class="eyebrow">Your impression</p>
+            <h1 id="page-hero-review">Share how the stay felt.</h1>
+            <p class="page-hero-copy">A few honest lines are enough. The goal is simply to help the next guest understand the place a little better.</p>
+            <div id="review-hero-meta" class="review-hero-meta" aria-live="polite">
+                <span class="review-hero-chip">Reviewing this place</span>
+                <span class="review-hero-chip">1 to 5 stars</span>
+                <span class="review-hero-chip">Signed-in guests only</span>
+            </div>
+        </section>
+
         <section class="review-section" aria-labelledby="review-heading">
             <form id="review-form" method="post" novalidate>
-                <h1 id="review-heading">Add a Review</h1>
+                <p class="form-kicker">Leave a note</p>
+                <h2 id="review-heading">Add a Review</h2>
                 <p class="form-copy">
-                    You are reviewing <strong id="reviewed-place-name">this place</strong>.
+                    You are writing about <strong id="reviewed-place-name">this place</strong>.
                 </p>
                 <p id="review-message" class="form-message" aria-live="polite" role="status"></p>
 
-                <label for="review">Your review</label>
-                <textarea
-                    id="review"
-                    name="review"
-                    rows="6"
-                    required
-                    aria-required="true"
-                    aria-describedby="review-message"
-                    placeholder="Share your experience…"
-                ></textarea>
+                <div class="review-form-grid">
+                    <section class="review-form-panel review-form-panel--writing" aria-labelledby="writing-panel-title">
+                        <div class="review-form-panel__header">
+                            <p class="review-form-panel__kicker">A few words</p>
+                            <h3 id="writing-panel-title">What stayed with you?</h3>
+                        </div>
+                        <label for="review">Your review</label>
+                        <textarea
+                            id="review"
+                            name="review"
+                            rows="6"
+                            required
+                            aria-required="true"
+                            aria-describedby="review-message"
+                            placeholder="Share your experience…"
+                        ></textarea>
+                    </section>
 
-                <fieldset class="star-rating-group">
-                    <legend>Rating</legend>
-                    <!-- Inputs ordered 5→1; flex row-reverse shows them 1→5 visually -->
-                    <div class="star-rating" role="group" aria-label="Select a rating from 1 to 5">
-                        <input type="radio" id="star5" name="rating" value="5" required aria-required="true">
-                        <label for="star5" title="5 – Excellent" aria-label="5 stars – Excellent">★</label>
-                        <input type="radio" id="star4" name="rating" value="4">
-                        <label for="star4" title="4 – Very good" aria-label="4 stars – Very good">★</label>
-                        <input type="radio" id="star3" name="rating" value="3">
-                        <label for="star3" title="3 – Good" aria-label="3 stars – Good">★</label>
-                        <input type="radio" id="star2" name="rating" value="2">
-                        <label for="star2" title="2 – Fair" aria-label="2 stars – Fair">★</label>
-                        <input type="radio" id="star1" name="rating" value="1">
-                        <label for="star1" title="1 – Poor" aria-label="1 star – Poor">★</label>
-                    </div>
-                    <span class="star-hint">Click a star to rate</span>
-                </fieldset>
+                    <section class="review-form-panel review-form-panel--rating" aria-labelledby="rating-panel-title">
+                        <div class="review-form-panel__header">
+                            <p class="review-form-panel__kicker">Your rating</p>
+                            <h3 id="rating-panel-title">How would you rate it?</h3>
+                        </div>
+                        <fieldset class="star-rating-group">
+                            <legend>Rating</legend>
+                            <div class="star-rating" role="group" aria-label="Select a rating from 1 to 5">
+                                <input type="radio" id="star5" name="rating" value="5" required aria-required="true">
+                                <label for="star5" title="5 – Excellent" aria-label="5 stars – Excellent">★</label>
+                                <input type="radio" id="star4" name="rating" value="4">
+                                <label for="star4" title="4 – Very good" aria-label="4 stars – Very good">★</label>
+                                <input type="radio" id="star3" name="rating" value="3">
+                                <label for="star3" title="3 – Good" aria-label="3 stars – Good">★</label>
+                                <input type="radio" id="star2" name="rating" value="2">
+                                <label for="star2" title="2 – Fair" aria-label="2 stars – Fair">★</label>
+                                <input type="radio" id="star1" name="rating" value="1">
+                                <label for="star1" title="1 – Poor" aria-label="1 star – Poor">★</label>
+                            </div>
+                            <span class="star-hint">Choose the score that feels right.</span>
+                        </fieldset>
+                    </section>
+                </div>
 
                 <button type="submit">Submit Review</button>
             </form>

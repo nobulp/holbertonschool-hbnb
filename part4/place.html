@@ -26,12 +26,23 @@
         </nav>
     </header>
 
-    <main id="main-content">
+    <main id="main-content" class="page-shell">
+        <section class="page-hero page-hero--detail" aria-labelledby="page-hero-detail">
+            <p class="eyebrow">Place details</p>
+            <h1 id="page-hero-detail">A closer look at the stay.</h1>
+            <p class="page-hero-copy">Everything useful in one place: host, nightly rate, amenities, and guest feedback.</p>
+            <div id="place-hero-meta" class="place-hero-meta" aria-live="polite">
+                <span class="place-hero-chip">Loading host…</span>
+                <span class="place-hero-chip">Loading price…</span>
+                <span class="place-hero-chip">Loading amenities…</span>
+            </div>
+        </section>
+
         <section class="place-details" aria-labelledby="place-title">
             <div class="place-heading">
                 <div>
                     <p class="eyebrow">Featured stay</p>
-                    <h1 id="place-title">Loading place...</h1>
+                    <h2 id="place-title">Loading place...</h2>
                 </div>
                 <div id="add-review" class="add-review" hidden>
                     <a href="add_review.html" id="add-review-link" class="details-button">Add Review</a>
@@ -42,7 +53,13 @@
         </section>
 
         <section id="reviews" class="reviews-section" aria-labelledby="reviews-heading">
-            <h2 id="reviews-heading">Reviews</h2>
+            <div class="reviews-heading">
+                <div>
+                    <p class="eyebrow eyebrow--dark">Guest notes</p>
+                    <h2 id="reviews-heading">Reviews</h2>
+                </div>
+                <p class="reviews-copy">A quick read on what previous guests thought of the stay.</p>
+            </div>
             <div id="reviews-list" class="reviews-grid" aria-live="polite">
                 <p id="reviews-status" class="places-status">Loading reviews...</p>
             </div>
