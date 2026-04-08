@@ -57,6 +57,8 @@ body[data-theme="dark"] {
    ===================================================================== */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+[hidden] { display: none !important; }
+
 body {
   font-family: "Avenir Next", "Segoe UI", sans-serif;
   background:
@@ -2118,6 +2120,9 @@ body[data-theme="dark"] .price-tag span {
 [data-reveal="card"] {
   transition-duration: 620ms;
 }
+
+[data-reveal-order="2"] { transition-delay: 130ms; }
+[data-reveal-order="3"] { transition-delay: 260ms; }
 
 /* =====================================================================
    Place details page

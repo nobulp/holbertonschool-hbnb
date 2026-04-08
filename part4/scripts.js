@@ -57,27 +57,32 @@ function setupNav() {
 
   if (loginLink) {
     loginLink.hidden = !!token;
+    loginLink.style.display = token ? 'none' : '';
   }
 
   if (addPlaceLink) {
     addPlaceLink.hidden = !token;
     addPlaceLink.setAttribute('aria-hidden', String(!token));
+    addPlaceLink.style.display = token ? '' : 'none';
   }
 
   if (myPlacesLink) {
     myPlacesLink.hidden = !token;
     myPlacesLink.setAttribute('aria-hidden', String(!token));
+    myPlacesLink.style.display = token ? '' : 'none';
   }
 
   if (adminLink) {
     const isAdmin = Boolean(token && getJwtPayload(token).is_admin);
     adminLink.hidden = !isAdmin;
     adminLink.setAttribute('aria-hidden', String(!isAdmin));
+    adminLink.style.display = isAdmin ? '' : 'none';
   }
 
   if (logoutButton) {
     logoutButton.hidden = !token;
     logoutButton.setAttribute('aria-hidden', String(!token));
+    logoutButton.style.display = token ? '' : 'none';
     logoutButton.addEventListener('click', logout);
   }
 }
@@ -803,19 +808,26 @@ function setupScrollReveal() {
     return;
   }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('is-visible');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, {
-    rootMargin: '0px 0px -12% 0px',
-    threshold: 0.12
-  });
+  // Double rAF : laisse le navigateur peindre l'état opacity:0 initial
+  // avant de démarrer l'observation, sinon la transition est invisible
+  // pour les éléments déjà dans le viewport au chargement.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        rootMargin: '0px 0px -12% 0px',
+        threshold: 0.12
+      });
 
-  items.forEach((item) => observer.observe(item));
+      items.forEach((item) => observer.observe(item));
+    });
+  });
 }
 
 /**
