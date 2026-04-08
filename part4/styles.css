@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;0,9..144,700;0,9..144,800;1,9..144,400;1,9..144,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+
 /* =====================================================================
    Design tokens
    ===================================================================== */
@@ -26,6 +28,8 @@
   --r:           16px;
   --r-sm:        10px;
   --r-full:      9999px;
+  --font-display: 'Fraunces', 'Georgia', serif;
+  --font-body:    'DM Sans', 'Avenir Next', 'Segoe UI', sans-serif;
 }
 
 body[data-theme="dark"] {
@@ -60,8 +64,9 @@ body[data-theme="dark"] {
 [hidden] { display: none !important; }
 
 body {
-  font-family: "Avenir Next", "Segoe UI", sans-serif;
+  font-family: var(--font-body);
   background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='256' height='256' filter='url(%23n)' opacity='0.046'/></svg>") center / 256px 256px,
     radial-gradient(circle at top left, rgba(199,99,66,0.12), transparent 20%),
     linear-gradient(180deg, #FCEFE6 0%, var(--bg) 100%);
   color: var(--text);
@@ -104,6 +109,7 @@ dialog {
 
 body[data-theme="dark"] {
   background:
+    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.72' numOctaves='4' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='256' height='256' filter='url(%23n)' opacity='0.06'/></svg>") center / 256px 256px,
     radial-gradient(circle at 12% 8%, rgba(240, 138, 93, 0.16), transparent 18%),
     radial-gradient(circle at 85% 18%, rgba(126, 72, 53, 0.24), transparent 24%),
     linear-gradient(180deg, #181216 0%, #120F12 55%, #0D0B0F 100%);
@@ -168,8 +174,11 @@ img { display: block; max-width: 100%; }
 button { cursor: pointer; }
 
 h1, h2, h3 {
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: 'ss01' 1, 'ss02' 1;
 }
 
 /* =====================================================================
@@ -276,10 +285,12 @@ body[data-theme="dark"].header-condensed header {
 }
 
 .logo-name {
-  font-size: 1.15rem;
+  font-family: var(--font-display);
+  font-size: 1.22rem;
   font-weight: 800;
   color: var(--accent);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.05em;
+  font-variation-settings: 'WONK' 1;
   transition:
     opacity 260ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -818,11 +829,12 @@ body:not([data-theme="dark"]) .page-hero {
 }
 
 .page-hero h1 {
-  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-size: clamp(2rem, 4.2vw, 3.2rem);
   color: var(--text);
-  letter-spacing: -0.04em;
+  letter-spacing: -0.036em;
   max-width: 14ch;
   margin-bottom: 8px;
+  font-variation-settings: 'WONK' 1;
 }
 
 .page-hero-copy {
@@ -1114,8 +1126,9 @@ body[data-theme="dark"] .hero--landscape::after {
 }
 
 .listing-panel__header h2 {
-  font-size: clamp(1.28rem, 2.2vw, 1.84rem);
+  font-size: clamp(1.32rem, 2.2vw, 1.9rem);
   color: var(--text);
+  font-variation-settings: 'WONK' 1;
 }
 
 .listing-panel__copy {
@@ -1179,15 +1192,25 @@ body[data-theme="dark"] .hero--landscape::after {
 }
 
 .hero-minimal-meta span {
-  padding: 9px 15px;
+  padding: 9px 18px;
   border-radius: 999px;
-  background: rgba(255, 248, 242, 0.74);
-  border: 1px solid rgba(214, 171, 149, 0.24);
+  background: rgba(255, 248, 242, 0.78);
+  border: 1px solid rgba(214, 171, 149, 0.28);
   color: rgba(74, 47, 35, 0.88);
-  font-size: 0.8rem;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
   font-weight: 600;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(12px) saturate(1.04);
+  -webkit-backdrop-filter: blur(12px) saturate(1.04);
+  box-shadow: 0 4px 12px rgba(93, 47, 34, 0.06);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.hero-minimal-meta span:hover {
+  background: rgba(255, 248, 242, 0.94);
+  box-shadow: 0 6px 18px rgba(93, 47, 34, 0.10);
+  transform: translateY(-1px);
 }
 
 .listing-panel--minimal {
@@ -1358,23 +1381,25 @@ body[data-theme="dark"] .listing-panel--minimal::before {
   background: rgba(255, 248, 242, 0.74);
   backdrop-filter: blur(4px);
   color: var(--accent);
-  font-size: 0.78rem;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   margin-bottom: 16px;
 }
 .hero h1 {
-  font-size: clamp(2.4rem, 5.2vw, 4.8rem);
+  font-size: clamp(2.6rem, 5.6vw, 5.2rem);
   font-weight: 800;
-  line-height: 0.96;
-  letter-spacing: -0.055em;
+  line-height: 0.94;
+  letter-spacing: -0.04em;
   color: var(--text);
   margin-bottom: 18px;
   max-width: 11ch;
   margin-left: auto;
   margin-right: auto;
   text-wrap: balance;
+  font-variation-settings: 'WONK' 1;
 }
 .hero-copy {
   font-size: 0.98rem;
@@ -1813,6 +1838,7 @@ body[data-theme="dark"] .places-status--error {
    Place card  (fixed spec values kept)
    ===================================================================== */
 .place-card {
+  position: relative;
   margin: 14px;
   padding: 0;
   border: 1px solid rgba(214, 171, 149, 0.12);
@@ -1855,7 +1881,7 @@ body[data-theme="dark"] .site-notice {
 }
 
 body[data-theme="dark"] .place-card::before {
-  background: linear-gradient(90deg, #F08A5D, #E4A86B, #8C6A58);
+  background: linear-gradient(90deg, #F08A5D, #FFBE55, #8FA89A);
 }
 
 body[data-theme="dark"] .place-card h2,
@@ -1884,18 +1910,23 @@ body[data-theme="dark"] .places-status {
   color: var(--text-soft);
 }
 .place-card:hover {
-  box-shadow: 0 26px 54px rgba(93, 47, 34, 0.12);
-  border-color: rgba(214, 171, 149, 0.2);
+  box-shadow: 0 28px 56px rgba(93, 47, 34, 0.14);
+  border-color: rgba(199, 99, 66, 0.18);
   transform: translateY(-5px);
+}
+
+.place-card:hover::before {
+  opacity: 1;
+  transform: scaleX(1);
 }
 
 .place-media {
   position: relative;
   margin: 0;
-  height: 220px;
+  height: 232px;
   overflow: hidden;
   border-radius: 22px 22px 0 0;
-  background: #d5d0ca;
+  background: linear-gradient(135deg, #d8c8be 0%, #c4b4aa 100%);
 }
 
 .place-media::after {
@@ -1919,7 +1950,19 @@ body[data-theme="dark"] .places-status {
 }
 
 .place-card::before {
-  display: none;
+  display: block;
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  border-radius: 22px 22px 0 0;
+  background: linear-gradient(90deg, var(--accent), var(--star), var(--teal));
+  opacity: 0;
+  transform: scaleX(0.6);
+  transform-origin: left center;
+  transition:
+    opacity 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .place-card-body {
@@ -2302,11 +2345,12 @@ body:not([data-theme="dark"]) .reviews-section {
 }
 
 .reviews-section h2 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.034em;
   margin-bottom: 0;
   color: var(--text);
+  font-variation-settings: 'WONK' 1;
 }
 
 .reviews-grid {
@@ -2324,20 +2368,32 @@ body[data-theme="dark"] .reviews-section {
    Review card  (fixed spec values kept)
    ===================================================================== */
 .review-card {
+  position: relative;
   margin: 20px;
   padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  border: 1px solid rgba(214, 171, 149, 0.14);
+  border-left: none;
+  border-radius: 14px;
   background:
     linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.14)),
     var(--glass);
   box-shadow: var(--glass-shadow);
-  /* extra polish */
-  padding: 18px;
-  border-left: 4px solid var(--star);
-  transition: box-shadow 0.2s;
+  padding: 18px 18px 18px 22px;
+  transition: box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   backdrop-filter: blur(18px) saturate(1.06);
   -webkit-backdrop-filter: blur(18px) saturate(1.06);
+  overflow: hidden;
+}
+
+.review-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: linear-gradient(180deg, var(--accent), var(--star));
 }
 .review-card:hover { box-shadow: var(--shadow); }
 
@@ -2648,17 +2704,19 @@ form {
 }
 
 form h1 {
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.036em;
   color: var(--text);
+  font-variation-settings: 'WONK' 1;
 }
 
 form h2 {
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: 800;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.036em;
   color: var(--text);
+  font-variation-settings: 'WONK' 1;
 }
 
 .form-kicker {
